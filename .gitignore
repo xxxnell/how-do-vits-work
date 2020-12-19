@@ -1,0 +1,7 @@
+__pycache__
+.idea
+.ipynb_checkpoints
+venv
+runs
+data
+models_checkpoints
