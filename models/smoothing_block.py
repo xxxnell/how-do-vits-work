@@ -5,12 +5,12 @@ import models.layers as layers
 
 class SigmoidBlurBlock(nn.Module):
 
-    def __init__(self, in_filters, temp=1e2, sfilter=(1, 1), pad_mode='replicate', **kwargs):
+    def __init__(self, in_filters, temp=2e0, sfilter=(1, 1), pad_mode="constant", **kwargs):
         super(SigmoidBlurBlock, self).__init__()
 
         self.temp = temp
         self.layer0 = nn.Sigmoid()
-        self.layer1 = layers.Blur(in_filters, filter=sfilter, pad_mode=pad_mode)
+        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
         x = 2 * self.layer0(x / self.temp) - 1
@@ -21,12 +21,12 @@ class SigmoidBlurBlock(nn.Module):
 
 class SoftmaxBlurBlock(nn.Module):
 
-    def __init__(self, in_filters, temp=1e0, filters=(1, 1), pad_mode='replicate', **kwargs):
+    def __init__(self, in_filters, temp=1e0, sfilter=(1, 1), pad_mode="constant", **kwargs):
         super(SoftmaxBlurBlock, self).__init__()
 
         self.temp = temp
         self.layer0 = nn.Softmax(dim=1)
-        self.layer1 = layers.Blur(in_filters, filter=filters, pad_mode=pad_mode)
+        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
         x = self.layer0(x / self.temp)
@@ -37,11 +37,11 @@ class SoftmaxBlurBlock(nn.Module):
 
 class ReLuBlurBlock(nn.Module):
 
-    def __init__(self, in_filters, thr=6.0, filters=(1, 1), pad_mode='replicate', **kwargs):
+    def __init__(self, in_filters, thr=6.0, sfilter=(1, 1), pad_mode="constant", **kwargs):
         super(ReLuBlurBlock, self).__init__()
 
         self.thr = thr
-        self.layer1 = layers.Blur(in_filters, filter=filters, pad_mode=pad_mode)
+        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
         x = torch.clamp(x, 0.0, self.thr)
@@ -52,7 +52,7 @@ class ReLuBlurBlock(nn.Module):
 
 class ScalingBlock(nn.Module):
 
-    def __init__(self, temp=1e2, **kwargs):
+    def __init__(self, temp=2e0, **kwargs):
         super(ScalingBlock, self).__init__()
 
         self.temp = temp
@@ -91,10 +91,10 @@ class TanhBlock(nn.Module):
 
 class BlurBlock(nn.Module):
 
-    def __init__(self, in_filters, filters=(1, 1), pad_mode='replicate', **kwargs):
+    def __init__(self, in_filters, sfilter=(1, 1), pad_mode="constant", **kwargs):
         super(BlurBlock, self).__init__()
 
-        self.layer1 = layers.Blur(in_filters, filter=filters, pad_mode=pad_mode)
+        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
         x = self.layer1(x)

@@ -4,26 +4,72 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Blur(nn.Module):
+def conv1x1(in_channels, out_channels, stride=1, groups=1):
+    return convnxn(in_channels, out_channels, kernel_size=1, stride=stride, groups=groups)
 
-    def __init__(self, in_filters, filter=(1, 1), pad_mode='replicate', **kwargs):
-        super(Blur, self).__init__()
 
-        filter_size = len(filter)
-        self.filter_proto = torch.tensor(filter, dtype=torch.float, requires_grad=False)
+def conv3x3(in_channels, out_channels, stride=1, groups=1):
+    return convnxn(in_channels, out_channels, kernel_size=3, stride=stride, groups=groups, padding=1)
+
+
+def convnxn(in_channels, out_channels, kernel_size, stride=1, groups=1, padding=0):
+    return nn.Conv2d(in_channels, out_channels,
+                     kernel_size=kernel_size, stride=stride, padding=padding, groups=groups, bias=False)
+
+
+def relu():
+    return nn.ReLU(inplace=True)
+
+
+def bn(channels):
+    return nn.BatchNorm2d(channels)
+
+
+def dense(in_features, out_features):
+    return nn.Linear(in_features, out_features)
+
+
+def blur(in_filters, sfilter=(1, 1), pad_mode="constant"):
+    if tuple(sfilter) == (1, 1) and pad_mode in ["constant", "zero"]:
+        layer = nn.AvgPool2d(kernel_size=2, stride=1, padding=1)
+    else:
+        layer = Blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+    return layer
+
+
+class SamePad(nn.Module):
+
+    def __init__(self, filter_size, pad_mode="constant", **kwargs):
+        super(SamePad, self).__init__()
+
         self.pad_size = [
             int((filter_size - 1) / 2.0), int(math.ceil((filter_size - 1) / 2.0)),
             int((filter_size - 1) / 2.0), int(math.ceil((filter_size - 1) / 2.0)),
         ]
         self.pad_mode = pad_mode
 
+    def forward(self, x):
+        x = F.pad(x, self.pad_size, mode=self.pad_mode)
+
+        return x
+
+
+class Blur(nn.Module):
+
+    def __init__(self, in_filters, sfilter=(1, 1), pad_mode="replicate", **kwargs):
+        super(Blur, self).__init__()
+
+        filter_size = len(sfilter)
+        self.pad = SamePad(filter_size, pad_mode=pad_mode)
+
+        self.filter_proto = torch.tensor(sfilter, dtype=torch.float, requires_grad=False)
         self.filter = torch.tensordot(self.filter_proto, self.filter_proto, dims=0)
         self.filter = self.filter / torch.sum(self.filter)
         self.filter = self.filter.repeat([in_filters, 1, 1, 1])
         self.filter = torch.nn.Parameter(self.filter, requires_grad=False)
 
     def forward(self, x):
-        x = F.pad(x, self.pad_size, mode=self.pad_mode)
+        x = self.pad(x)
         x = F.conv2d(x, self.filter, groups=x.size()[1])
 
         return x

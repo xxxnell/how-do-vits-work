@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import models.layers as layers
 
 
 class GAPBlock(nn.Module):
@@ -9,7 +10,7 @@ class GAPBlock(nn.Module):
         super(GAPBlock, self).__init__()
 
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.dense = nn.Linear(in_features, num_classes)
+        self.dense = layers.dense(in_features, num_classes)
 
     def forward(self, x):
         x = self.gap(x)
@@ -24,13 +25,13 @@ class MLPBlock(nn.Module):
     def __init__(self, in_features, num_classes, **kwargs):
         super(MLPBlock, self).__init__()
 
-        self.dense1 = nn.Linear(in_features, 4096)
-        self.relu1 = nn.ReLU(inplace=True)
+        self.dense1 = layers.dense(in_features, 4096)
+        self.relu1 = layers.relu()
         self.dropout1 = nn.Dropout(p=0.5)
-        self.dense2 = nn.Linear(4096, 4096)
-        self.relu2 = nn.ReLU(inplace=True)
+        self.dense2 = layers.dense(4096, 4096)
+        self.relu2 = layers.relu()
         self.dropout2 = nn.Dropout(p=0.5)
-        self.dense3 = nn.Linear(4096, num_classes)
+        self.dense3 = layers.dense(4096, num_classes)
 
     def forward(self, x):
         x = x.view(x.size()[0], -1)
@@ -51,7 +52,7 @@ class GMaxPBlock(nn.Module):
         super(GMaxPBlock, self).__init__()
 
         self.gmp = nn.AdaptiveMaxPool2d((1, 1))
-        self.dense = nn.Linear(in_features, num_classes)
+        self.dense = layers.dense(in_features, num_classes)
 
     def forward(self, x):
         x = self.gmp(x)
@@ -66,11 +67,12 @@ class GMedPBlock(nn.Module):
     def __init__(self, in_features, num_classes, **kwargs):
         super(GMedPBlock, self).__init__()
 
-        self.dense = nn.Linear(in_features, num_classes)
+        self.dense = layers.dense(in_features, num_classes)
 
     def forward(self, x):
         x = x.view(x.size()[0], x.size()[1], -1)
         x = torch.topk(x, k=int(x.size()[2] / 2), dim=2)[0][:, :, -1]
+        x = x.view(x.size()[0], -1)
         x = self.dense(x)
 
         return x
@@ -78,16 +80,17 @@ class GMedPBlock(nn.Module):
 
 class GAPClipBlock(nn.Module):
 
-    def __init__(self, in_features, num_classes, **kwargs):
+    def __init__(self, in_features, num_classes, temp=2e0, **kwargs):
         super(GAPClipBlock, self).__init__()
 
+        self.temp = temp
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.dense = nn.Linear(in_features, num_classes)
+        self.dense = layers.dense(in_features, num_classes)
 
     def forward(self, x):
         x = self.gap(x)
+        x = 2 * F.sigmoid(x / self.temp) - 1
         x = x.view(x.size()[0], -1)
-        x = F.sigmoid(x)
         x = self.dense(x)
 
         return x
@@ -99,13 +102,13 @@ class GAPMLPBlock(nn.Module):
         super(GAPMLPBlock, self).__init__()
 
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.dense1 = nn.Linear(in_features, 4096)
-        self.relu1 = nn.ReLU(inplace=True)
+        self.dense1 = layers.dense(in_features, 4096)
+        self.relu1 = layers.relu()
         self.dropout1 = nn.Dropout(p=0.5)
-        self.dense2 = nn.Linear(4096, 4096)
-        self.relu2 = nn.ReLU(inplace=True)
+        self.dense2 = layers.dense(4096, 4096)
+        self.relu2 = layers.relu()
         self.dropout2 = nn.Dropout(p=0.5)
-        self.dense3 = nn.Linear(4096, num_classes)
+        self.dense3 = layers.dense(4096, num_classes)
 
     def forward(self, x):
         x = self.gap(x)

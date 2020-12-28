@@ -31,7 +31,10 @@ class VGGNet(nn.Module):
         self.classifier = []
         if cblock is classifier.MLPBlock:
             self.classifier.append(nn.MaxPool2d(kernel_size=2, stride=2))
-        self.classifier.append(cblock(512, num_classes))
+            self.classifier.append(nn.AdaptiveAvgPool2d((7, 7)))
+            self.classifier.append(cblock(7 * 7 * 512, num_classes, **block_kwargs))
+        else:
+            self.classifier.append(cblock(512, num_classes, **block_kwargs))
         self.classifier = nn.Sequential(*self.classifier)
 
     @staticmethod
