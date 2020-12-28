@@ -19,11 +19,12 @@ def test(model, n_ff, dataset, num_classes,
     cms = [[np.zeros(cm_shape), np.zeros(cm_shape)] for _ in range(len(cutoffs))]
     nll_value, brier_value, topk_value = -1.0, -1.0, -1.0
     n_acc, nll_acc, brier_acc, topk_acc = 0.0, 0.0, 0.0, 0.0
-    ious, accs, uncs, freqs, eces = [], [], [], [], []
+    ious, accs, uncs, freqs, ece_value = [], [], [], [], []
 
     cms_bin = [np.zeros(cm_shape) for _ in range(len(bins) - 1)]
     conf_acc_bin = [0.0 for _ in range(len(bins) - 1)]
     count_bin, acc_bin, conf_bin, metrics_str = [], [], [], []
+    metrics = None
 
     for step, (xs, ys) in enumerate(dataset):
         if gpu:
@@ -67,24 +68,16 @@ def test(model, n_ff, dataset, num_classes,
         count_bin = [np.sum(cm_bin) for cm_bin in cms_bin]
         acc_bin = [gacc(cm_bin) for cm_bin in cms_bin]
         conf_bin = [conf_acc / (count + 1e-7) for count, conf_acc in zip(count_bin, conf_acc_bin)]
-        eces = ece(count_bin, acc_bin, conf_bin)
+        ece_value = ece(count_bin, acc_bin, conf_bin)
 
-        metrics_str = [
-            "Time: %.3f ± %.3f ms" % (np.mean(predict_times) * 1e3, np.std(predict_times) * 1e3),
-            "NLL: %.4f" % nll_value,
-            "Cutoffs: " + ", ".join(["%.1f %%" % (cutoff * 100) for cutoff in cutoffs]),
-            "Accs: " + ", ".join(["%.3f %%" % (acc * 100) for acc in accs]),
-            "Uncs: " + ", ".join(["%.3f %%" % (unc * 100) for unc in uncs]),
-            "IoUs: " + ", ".join(["%.3f %%" % (iou * 100) for iou in ious]),
-            "Freqs: " + ", ".join(["%.3f %%" % (freq * 100) for freq in freqs]),
-            "Top-5: " + "%.3f %%" % (topk_value * 100),
-            "Brier: " + "%.3f" % (brier_value),
-            "ECE: " + "%.3f %%" % (eces * 100),
-        ]
+        metrics = nll_value, \
+                  cutoffs, cms, accs, uncs, ious, freqs, \
+                  topk_value, brier_value, \
+                  count_bin, acc_bin, conf_bin, ece_value
         if verbose and int(step + 1) % period is 0:
-            print("%d Steps, %s" % (int(step + 1), ", ".join(metrics_str)))
+            print("%d Steps, %s" % (int(step + 1), repr_metrics(metrics)))
 
-    print(", ".join(metrics_str))
+    print(repr_metrics(metrics))
 
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     confidence_histogram(axes[0], count_bin)
@@ -94,9 +87,66 @@ def test(model, n_ff, dataset, num_classes,
     if not verbose:
         plt.close(fig)
 
-    return nll_value, cms, accs, uncs, ious, freqs, \
-           topk_value, brier_value, \
-           count_bin, acc_bin, conf_bin, eces, calibration_image
+    return (*metrics, calibration_image)
+
+
+def repr_metrics(metrics):
+    nll_value, \
+    cutoffs, cms, accs, uncs, ious, freqs, \
+    topk_value, brier_value, \
+    count_bin, acc_bin, conf_bin, ece_value = metrics
+
+    metrics_reprs = [
+        "NLL: %.4f" % nll_value,
+        "Cutoffs: " + ", ".join(["%.1f %%" % (cutoff * 100) for cutoff in cutoffs]),
+        "Accs: " + ", ".join(["%.3f %%" % (acc * 100) for acc in accs]),
+        "Uncs: " + ", ".join(["%.3f %%" % (unc * 100) for unc in uncs]),
+        "IoUs: " + ", ".join(["%.3f %%" % (iou * 100) for iou in ious]),
+        "Freqs: " + ", ".join(["%.3f %%" % (freq * 100) for freq in freqs]),
+        "Top-5: " + "%.3f %%" % (topk_value * 100),
+        "Brier: " + "%.3f" % brier_value,
+        "ECE: " + "%.3f %%" % (ece_value * 100),
+    ]
+
+    return ", ".join(metrics_reprs)
+
+
+def save_metrics(metrics_dir, metrics_list):
+    with open(metrics_dir, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        for metrics in metrics_list:
+            *keys, \
+            nll_value, \
+            cutoffs, cms, accs, uncs, ious, freqs, \
+            topk_value, brier_value, \
+            count_bin, acc_bin, conf_bin, ece_value = metrics
+
+            writer.writerow([
+                *keys,
+                nll_value, *cutoffs, *accs, *uncs, *ious, *freqs,
+                topk_value, brier_value, ece_value
+            ])
+
+
+@torch.no_grad()
+def test_prediction_time(model, n_ff, input_size, n=100, gpu=True):
+    model = model.eval()
+    predict_times = []
+
+    for _ in range(n):
+        xs = torch.rand(input_size)
+        xs = xs.cuda() if gpu else xs
+
+        start_time = time.time()
+        ys_pred = torch.stack([F.softmax(model(xs), dim=1) for _ in range(n_ff)])
+        ys_pred = torch.mean(ys_pred, dim=0)
+        torch.cuda.synchronize() if gpu else None
+        predict_times.append(time.time() - start_time)
+
+    print("Time: %.3f ± %.3f ms" %
+          (np.mean(predict_times) * 1e3, np.std(predict_times) * 1e3))
+
+    return predict_times
 
 
 def brier(ys, ys_pred):
@@ -161,7 +211,7 @@ def gacc(cm):
     """
     num = np.diag(cm).sum()
     den = np.sum(cm)
-    return np.divide(num, den, out=np.zeros_like(num, dtype=float), where=(den != 0))
+    return np.divide(num, den, out=np.zeros_like(num, dtype=float), where=(den != 0)).tolist()
 
 
 def caccs(cm):
@@ -197,7 +247,7 @@ def ece(count_bin, acc_bin, conf_bin):
     acc_bin = np.array(acc_bin)
     conf_bin = np.array(conf_bin)
     freq = np.nan_to_num(count_bin / sum(count_bin))
-    ece_result = sum(np.absolute(acc_bin - conf_bin) * freq)
+    ece_result = np.sum(np.absolute(acc_bin - conf_bin) * freq)
     return ece_result
 
 
@@ -255,5 +305,9 @@ def plot_to_image(figure):
     image = trans(image)
 
     return image
+
+
+def count_parameters(model):
+    return sum(param.numel() for param in model.parameters() if param.requires_grad)
 
 
