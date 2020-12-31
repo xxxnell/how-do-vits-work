@@ -1,5 +1,7 @@
 import io
 import time
+import csv
+
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -9,17 +11,19 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 
+import ops.meters as meters
+
 
 @torch.no_grad()
 def test(model, n_ff, dataset, num_classes,
          cutoffs=(0.0, 0.9), bins=np.linspace(0.0, 1.0, 11), verbose=False, period=10, gpu=True):
     model.eval()
-    predict_times = []
     cm_shape = [num_classes, num_classes]
     cms = [[np.zeros(cm_shape), np.zeros(cm_shape)] for _ in range(len(cutoffs))]
-    nll_value, brier_value, topk_value = -1.0, -1.0, -1.0
-    n_acc, nll_acc, brier_acc, topk_acc = 0.0, 0.0, 0.0, 0.0
-    ious, accs, uncs, freqs, ece_value = [], [], [], [], []
+
+    nll_meter = meters.AverageMeter("nll")
+    brier_meter = meters.AverageMeter("brier")
+    topk_meter = meters.AverageMeter("top5")
 
     cms_bin = [np.zeros(cm_shape) for _ in range(len(bins) - 1)]
     conf_acc_bin = [0.0 for _ in range(len(bins) - 1)]
@@ -32,20 +36,17 @@ def test(model, n_ff, dataset, num_classes,
             ys = ys.cuda()
 
         # A. Predict results
-        batch_time = time.time()
         ys_pred = torch.stack([F.softmax(model(xs), dim=1) for _ in range(n_ff)])
         ys_pred = torch.mean(ys_pred, dim=0)
-        predict_times.append(time.time() - batch_time)
 
         if gpu:
             ys = ys.cpu()
             ys_pred = ys_pred.cpu()
 
         # B. Measure Confusion Matrices
-        n_acc = n_acc + xs.size()[0]
-        nll_acc = nll_acc + F.nll_loss(torch.log(ys_pred), ys, reduction="sum").item()
-        topk_acc = topk_acc + np.sum(topk(ys.numpy(), ys_pred.numpy()))
-        brier_acc = brier_acc + np.sum(brier(ys.numpy(), ys_pred.numpy()))
+        nll_meter.update(F.nll_loss(torch.log(ys_pred), ys, reduction="none").numpy())
+        topk_meter.update(topk(ys.numpy(), ys_pred.numpy()))
+        brier_meter.update(brier(ys.numpy(), ys_pred.numpy()))
 
         for cutoff, cm_group in zip(cutoffs, cms):
             cm_certain = cm(ys.numpy(), ys_pred.numpy(), filter_min=cutoff)
@@ -58,9 +59,9 @@ def test(model, n_ff, dataset, num_classes,
             condition = np.logical_and(confidence >= start, confidence < end)
             conf_acc_bin[i] = conf_acc_bin[i] + np.sum(confidence[condition])
 
-        nll_value = nll_acc / n_acc
-        topk_value = topk_acc / n_acc
-        brier_value = brier_acc / n_acc
+        nll_value = nll_meter.avg
+        topk_value = topk_meter.avg
+        brier_value = brier_meter.avg
         accs = [gacc(cm_certain) for cm_certain, cm_uncertain in cms]
         ious = [miou(cm_certain) for cm_certain, cm_uncertain in cms]
         uncs = [unconfidence(cm_certain, cm_uncertain) for cm_certain, cm_uncertain in cms]
@@ -131,7 +132,7 @@ def save_metrics(metrics_dir, metrics_list):
 @torch.no_grad()
 def test_prediction_time(model, n_ff, input_size, n=100, gpu=True):
     model = model.eval()
-    predict_times = []
+    predict_times = meters.AverageMeter("predict_times", "%.3f")
 
     for _ in range(n):
         xs = torch.rand(input_size)
@@ -141,10 +142,10 @@ def test_prediction_time(model, n_ff, input_size, n=100, gpu=True):
         ys_pred = torch.stack([F.softmax(model(xs), dim=1) for _ in range(n_ff)])
         ys_pred = torch.mean(ys_pred, dim=0)
         torch.cuda.synchronize() if gpu else None
-        predict_times.append(time.time() - start_time)
+        predict_times.update(time.time() - start_time)
 
-    print("Time: %.3f ± %.3f ms" %
-          (np.mean(predict_times) * 1e3, np.std(predict_times) * 1e3))
+    print("Time: %.3f±%.3f ms" %
+          (predict_times.avg * 1e3, predict_times.std * 1e3))
 
     return predict_times
 
@@ -305,9 +306,4 @@ def plot_to_image(figure):
     image = trans(image)
 
     return image
-
-
-def count_parameters(model):
-    return sum(param.numel() for param in model.parameters() if param.requires_grad)
-
 
