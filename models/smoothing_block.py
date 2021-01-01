@@ -13,6 +13,22 @@ class SigmoidBlurBlock(nn.Module):
         self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
+        x = self.temp * (self.layer0(x / self.temp) - 0.5)
+        x = self.layer1(x)
+
+        return x
+
+
+class BoundedSigmoidBlurBlock(nn.Module):
+
+    def __init__(self, in_filters, temp=2e0, sfilter=(1, 1), pad_mode="constant", **kwargs):
+        super(BoundedSigmoidBlurBlock, self).__init__()
+
+        self.temp = temp
+        self.layer0 = nn.Sigmoid()
+        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+
+    def forward(self, x):
         x = 2 * self.layer0(x / self.temp) - 1
         x = self.layer1(x)
 
@@ -52,7 +68,7 @@ class ReLuBlurBlock(nn.Module):
 
 class ScalingBlock(nn.Module):
 
-    def __init__(self, temp=2e0, **kwargs):
+    def __init__(self, temp=4*2e0, **kwargs):
         super(ScalingBlock, self).__init__()
 
         self.temp = temp
