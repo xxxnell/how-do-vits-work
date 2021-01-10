@@ -99,7 +99,6 @@ def dnn_19(num_classes=10, name="vgg_dnn_19"):
 
 # MC dropout
 
-
 def mcdo_11(num_classes=10, name="vgg_mcdo_11", **block_kwargs):
     return VGGNet(vggnet_mcdo.BasicBlock, [1, 1, 2, 2, 2],
                   num_classes=num_classes, name=name, **block_kwargs)

@@ -15,8 +15,8 @@ class BasicBlock(nn.Module):
         self.relu = layers.relu()
 
     def forward(self, x):
-        x = F.dropout(x, p=self.rate)
         x = self.conv(x)
         x = self.relu(x)
+        x = F.dropout(x, p=self.rate)
 
         return x
