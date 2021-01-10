@@ -49,10 +49,10 @@ class AlexNet(nn.Module):
         self.classifier = nn.Sequential(*self.classifier)
 
     @staticmethod
-    def _make_smooth_layer(sblock, filters, num_blocks, **block_kwargs):
+    def _make_smooth_layer(sblock, in_filters, num_blocks, **block_kwargs):
         layers = []
         for _ in range(num_blocks):
-            layers.append(sblock(filters=filters, **block_kwargs))
+            layers.append(sblock(in_filters=in_filters, **block_kwargs))
         return nn.Sequential(*layers)
 
     def forward(self, x):
