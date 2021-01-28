@@ -77,3 +77,15 @@ def dnn(num_classes=10, tiny=False, name="alexnet_dnn", **block_kwargs):
 def mcdo(num_classes=10, tiny=False, name="alexnet_mcdo", **block_kwargs):
     return AlexNet(alexnet_mcdo.BasicBlock, num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
+
+def dnn_smooth(num_classes=10, tiny=False, name="alexnet_dnn_smoothing", **block_kwargs):
+    return AlexNet(alexnet_dnn.BasicBlock,
+                   sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1],
+                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+
+
+def mcdo_smooth(num_classes=10, tiny=False, name="alexnet_mcdo_smoothing", **block_kwargs):
+    return AlexNet(alexnet_mcdo.BasicBlock,
+                   sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1],
+                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+
