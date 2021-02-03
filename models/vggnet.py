@@ -123,13 +123,13 @@ def mcdo_19(num_classes=10, name="vgg_mcdo_19", **block_kwargs):
 
 def dnn_smooth_11(num_classes=10, name="vgg_dnn_smoothing_11", **block_kwargs):
     return VGGNet(vggnet_dnn.BasicBlock, [1, 1, 2, 2, 2],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.SigmoidBlurBlock, num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
 def dnn_smooth_13(num_classes=10, name="vgg_dnn_smoothing_13", **block_kwargs):
     return VGGNet(vggnet_dnn.BasicBlock, [2, 2, 2, 2, 2],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.SigmoidBlurBlock, num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
