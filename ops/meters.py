@@ -17,6 +17,10 @@ class AverageMeter(object):
         self.sqsum = 0.0
         self.std = 0.0
 
+    def __str__(self):
+        fmtstr = "AverageMeter(%s, %" + self.fmt + "±%" + self.fmt + ")"
+        return fmtstr % (self.name, self.avg, self.std)
+
     def reset(self):
         self.avg = 0.0
         self.sum = 0.0
@@ -38,6 +42,3 @@ class AverageMeter(object):
     def result(self):
         return self.avg
 
-    def __str__(self):
-        fmtstr = "AverageMeter(%s, %" + self.fmt + "±%" + self.fmt + ")"
-        return fmtstr % (self.name, self.avg, self.std)

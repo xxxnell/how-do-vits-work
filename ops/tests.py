@@ -39,9 +39,8 @@ def test(model, n_ff, dataset, num_classes,
         ys_pred = torch.stack([F.softmax(model(xs), dim=1) for _ in range(n_ff)])
         ys_pred = torch.mean(ys_pred, dim=0)
 
-        if gpu:
-            ys = ys.cpu()
-            ys_pred = ys_pred.cpu()
+        ys = ys.cpu()
+        ys_pred = ys_pred.cpu()
 
         # B. Measure Confusion Matrices
         nll_meter.update(F.nll_loss(torch.log(ys_pred), ys, reduction="none").numpy())
