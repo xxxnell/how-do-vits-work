@@ -89,7 +89,7 @@ class GAPClipBlock(nn.Module):
 
     def forward(self, x):
         x = self.gap(x)
-        x = 2 * F.sigmoid(x / self.temp) - 1
+        x = self.temp * (F.sigmoid(x / self.temp) - 0.5)
         x = x.view(x.size()[0], -1)
         x = self.dense(x)
 

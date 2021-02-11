@@ -5,18 +5,21 @@ import models.layers as layers
 
 class SigmoidBlurBlock(nn.Module):
 
-    def __init__(self, in_filters, temp=2e0, sfilter=(1, 1), pad_mode="constant", **kwargs):
+    def __init__(self, in_filters, temp=5e-1, sfilter=(1, 1), pad_mode="constant", **kwargs):
         super(SigmoidBlurBlock, self).__init__()
 
         self.temp = temp
-        self.layer0 = nn.Sigmoid()
-        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+        self.sigmoid = nn.Sigmoid()
+        self.blur = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
-        x = self.temp * (self.layer0(x / self.temp) - 0.5)
-        x = self.layer1(x)
+        x = 4 * self.temp * (self.sigmoid(x / self.temp) - 0.5)
+        x = self.blur(x)
 
         return x
+
+    def extra_repr(self):
+        return "temp=%.3e" % self.temp
 
 
 class BoundedSigmoidBlurBlock(nn.Module):
@@ -25,14 +28,17 @@ class BoundedSigmoidBlurBlock(nn.Module):
         super(BoundedSigmoidBlurBlock, self).__init__()
 
         self.temp = temp
-        self.layer0 = nn.Sigmoid()
-        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+        self.sigmoid = nn.Sigmoid()
+        self.blur = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
-        x = 2 * self.layer0(x / self.temp) - 1
-        x = self.layer1(x)
+        x = 2 * self.sigmoid(x / self.temp) - 1
+        x = self.blur(x)
 
         return x
+
+    def extra_repr(self):
+        return "temp=%.3e" % self.temp
 
 
 class SoftmaxBlurBlock(nn.Module):
@@ -41,14 +47,17 @@ class SoftmaxBlurBlock(nn.Module):
         super(SoftmaxBlurBlock, self).__init__()
 
         self.temp = temp
-        self.layer0 = nn.Softmax(dim=1)
-        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+        self.softmax = nn.Softmax(dim=1)
+        self.blur = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
-        x = self.layer0(x / self.temp)
-        x = self.layer1(x)
+        x = self.softmax(x / self.temp)
+        x = self.blur(x)
 
         return x
+
+    def extra_repr(self):
+        return "temp=%.3e" % self.temp
 
 
 class ReLuBlurBlock(nn.Module):
@@ -57,13 +66,16 @@ class ReLuBlurBlock(nn.Module):
         super(ReLuBlurBlock, self).__init__()
 
         self.thr = thr
-        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+        self.blur = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
         x = torch.clamp(x, 0.0, self.thr)
-        x = self.layer1(x)
+        x = self.blur(x)
 
         return x
+
+    def extra_repr(self):
+        return "thr=%.3e" % self.thr
 
 
 class ScalingBlock(nn.Module):
@@ -76,6 +88,9 @@ class ScalingBlock(nn.Module):
     def forward(self, x):
         x = x / self.temp
         return x
+
+    def extra_repr(self):
+        return "temp=%.3e" % self.temp
 
 
 class ReLuBlock(nn.Module):
@@ -90,6 +105,9 @@ class ReLuBlock(nn.Module):
 
         return x
 
+    def extra_repr(self):
+        return "thr=%.3e" % self.thr
+
 
 class TanhBlock(nn.Module):
 
@@ -97,12 +115,15 @@ class TanhBlock(nn.Module):
         super(TanhBlock, self).__init__()
 
         self.temp = temp
-        self.layer0 = nn.Tanh()
+        self.tanh = nn.Tanh()
 
     def forward(self, x):
-        x = self.layer0(x / self.temp)
+        x = self.tanh(x / self.temp)
 
         return x
+
+    def extra_repr(self):
+        return "temp=%.3e" % self.temp
 
 
 class BlurBlock(nn.Module):
@@ -110,9 +131,9 @@ class BlurBlock(nn.Module):
     def __init__(self, in_filters, sfilter=(1, 1), pad_mode="constant", **kwargs):
         super(BlurBlock, self).__init__()
 
-        self.layer1 = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+        self.blur = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
 
     def forward(self, x):
-        x = self.layer1(x)
+        x = self.blur(x)
 
         return x

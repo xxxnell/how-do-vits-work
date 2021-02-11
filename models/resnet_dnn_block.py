@@ -22,7 +22,7 @@ class BasicBlock(nn.Module):
         self.conv1 = layers.conv3x3(in_channels, width, stride=stride)
         self.bn1 = layers.bn(width)
         self.relu1 = layers.relu()
-        self.conv2 = layers.conv3x3(width, channels * self.expansion, )
+        self.conv2 = layers.conv3x3(width, channels * self.expansion)
         self.bn2 = layers.bn(channels * self.expansion)
         self.relu2 = layers.relu()
 

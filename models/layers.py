@@ -1,4 +1,6 @@
 import math
+import random
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -53,6 +55,9 @@ class SamePad(nn.Module):
 
         return x
 
+    def extra_repr(self):
+        return "pad_size=%s, pad_mode=%s" % (self.pad_size, self.pad_mode)
+
 
 class Blur(nn.Module):
 
@@ -74,6 +79,9 @@ class Blur(nn.Module):
 
         return x
 
+    def extra_repr(self):
+        return "pad=%s, filter_proto=%s" % (self.pad, self.filter_proto.tolist())
+
 
 class Downsample(nn.Module):
 
@@ -89,3 +97,7 @@ class Downsample(nn.Module):
         x = F.interpolate(x, size=shape, mode='nearest')
 
         return x
+
+    def extra_repr(self):
+        return "strides=%s" % repr(self.strides)
+
