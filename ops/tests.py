@@ -15,9 +15,14 @@ import ops.meters as meters
 
 
 @torch.no_grad()
-def test(model, n_ff, dataset, num_classes,
+def test(model, n_ff, dataset,
          cutoffs=(0.0, 0.9), bins=np.linspace(0.0, 1.0, 11), verbose=False, period=10, gpu=True):
     model.eval()
+    model = model.cuda() if gpu else model.cpu()
+    xs, ys = next(iter(dataset))
+    xs = xs.cuda() if gpu else xs.cpu()
+    num_classes = model(xs).size()[-1]
+
     cm_shape = [num_classes, num_classes]
     cms = [[np.zeros(cm_shape), np.zeros(cm_shape)] for _ in range(len(cutoffs))]
 
