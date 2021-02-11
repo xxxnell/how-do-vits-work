@@ -22,6 +22,29 @@ class SigmoidBlurBlock(nn.Module):
         return "temp=%.3e" % self.temp
 
 
+class PreSigmoidBlurBlock(nn.Module):
+
+    def __init__(self, in_filters, temp=2e0, sfilter=(1, 1), pad_mode="constant", **kwargs):
+        super(PreSigmoidBlurBlock, self).__init__()
+
+        self.temp = temp
+        self.bn = layers.bn(in_filters)
+        self.relu = layers.relu()
+        self.sigmoid = nn.Sigmoid()
+        self.blur = layers.blur(in_filters, sfilter=sfilter, pad_mode=pad_mode)
+
+    def forward(self, x):
+        x = self.bn(x)
+        x = self.relu(x)
+        x = 4 * self.temp * (self.sigmoid(x / self.temp) - 0.5)
+        x = self.blur(x)
+
+        return x
+
+    def extra_repr(self):
+        return "temp=%.3e" % self.temp
+
+
 class BoundedSigmoidBlurBlock(nn.Module):
 
     def __init__(self, in_filters, temp=2e0, sfilter=(1, 1), pad_mode="constant", **kwargs):
