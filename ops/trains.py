@@ -1,15 +1,18 @@
-import math
-import random
+import time
+import copy
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torchvision
 
-import ops.meters
-import ops.norm
+import ops.tests as tests
+import ops.meters as meters
+import ops.norm as norm
+
 
 def get_optimizer(model, name, **kwargs):
-    sch_kwargs = kwargs.pop("scheduler", {})
+    sch_kwargs = copy.deepcopy(kwargs.pop("scheduler", {}))
     if name in ["SGD", "Sgd", "sgd"]:
         optimizer = optim.SGD(model.parameters(), **kwargs)
     elif name in ["Adam", "adam"]:
@@ -26,16 +29,64 @@ def get_optimizer(model, name, **kwargs):
     return optimizer, train_scheduler
 
 
+def train(model, optimizer,
+          dataset_train, dataset_val,
+          train_scheduler, warmup_scheduler,
+          train_args, val_args, gpu,
+          writer=None,
+          verbose=1):
+    train_args = copy.deepcopy(train_args)
+    val_args = copy.deepcopy(val_args)
+
+    epochs = train_args.pop("epochs")
+    warmup_epochs = train_args.get("warmup_epochs", 0)
+    n_ff = val_args.pop("n_ff", 1)
+
+    model = model.cuda() if gpu else model.cpu()
+    warmup_time = time.time()
+    for epoch in range(warmup_epochs):
+        *train_metrics, = train_epoch(optimizer, model, dataset_train, warmup_scheduler, gpu=gpu)
+    if warmup_epochs > 0:
+        print("The model is warmed up: %.2f sec" % (time.time() - warmup_time))
+
+    for epoch in range(epochs):
+        batch_time = time.time()
+        *train_metrics, = train_epoch(optimizer, model, dataset_train,
+                                             gpu=gpu)
+        train_scheduler.step()
+        batch_time = time.time() - batch_time
+
+        if writer is not None and (epoch + 1) % 1 == 0:
+            add_train_metrics(writer, train_metrics, epoch)
+            template = "(%.2f sec/epoch) Epoch: %d, Loss: %.4f, lr: %.3e"
+            print(template % (batch_time,
+                              epoch,
+                              train_metrics[0],
+                              [param_group["lr"] for param_group in optimizer.param_groups][0]))
+
+        if writer is not None and (epoch + 1) % 1 == 0:
+            *test_metrics, cal_diag = tests.test(model, n_ff, dataset_val, verbose=False, gpu=gpu)
+            add_test_metrics(writer, test_metrics, epoch)
+
+            cal_diag = torchvision.utils.make_grid(cal_diag)
+            writer.add_image("test/calibration diagrams", cal_diag, global_step=epoch)
+
+            if verbose > 1:
+                for name, param in model.named_parameters():
+                    name = name.split(".")
+                    writer.add_histogram("%s/%s" % (name[0], ".".join(name[1:])), param, global_step=epoch)
+
+
 def train_epoch(optimizer, model, dataset,
                 scheduler=None, gpu=True):
     model.train()
     nll_function = nn.CrossEntropyLoss()
     nll_function = nll_function.cuda() if gpu else nll_function
 
-    loss_meter = ops.meters.AverageMeter("loss")
-    nll_meter = ops.meters.AverageMeter("nll")
-    l1_meter = ops.meters.AverageMeter("l1")
-    l2_meter = ops.meters.AverageMeter("l2")
+    loss_meter = meters.AverageMeter("loss")
+    nll_meter = meters.AverageMeter("nll")
+    l1_meter = meters.AverageMeter("l1")
+    l2_meter = meters.AverageMeter("l2")
 
     for step, (xs, ys) in enumerate(dataset):
         if gpu:
@@ -54,10 +105,10 @@ def train_epoch(optimizer, model, dataset,
         if scheduler:
             scheduler.step()
 
-    l1_reg = ops.norm.l1(model, gpu)
+    l1_reg = norm.l1(model, gpu)
     l1_meter.update(l1_reg.item())
 
-    l2_reg = ops.norm.l2(model, gpu)
+    l2_reg = norm.l2(model, gpu)
     l2_meter.update(l2_reg.item())
 
     return loss_meter.avg, nll_meter.avg, l1_meter.avg, l2_meter.avg
