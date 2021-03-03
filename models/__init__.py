@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 
 import torch
@@ -9,6 +10,9 @@ import models.resnet as resnet
 import models.preresnet as preresnet
 import models.resnext as resnext
 import models.wideresnet as wideresnet
+
+import ops.meters as meters
+
 
 def get_model(name, num_classes=10, tiny=False, verbose=True, **block_kwargs):
     # AlexNet
@@ -216,7 +220,17 @@ def count_parameters(model):
     return sum(param.numel() for param in model.parameters() if param.requires_grad)
 
 
-def set_seed(model, seed):
-    for module in model.modules():
-        if isinstance(module, layers.DropChannel):
-            module.seed = seed
+def measure_executive_time(model, size=(1, 3, 32, 32), n=1000, gpu=True):
+    model.eval()
+    model = model.cuda() if gpu else model.cpu()
+    meter = meters.AverageMeter("time")
+    xs = [torch.normal(0, 1, size=size) for _ in range(n)]
+    for x in xs:
+        if gpu:
+            x = x.cuda()
+
+        t = time.time()
+        _ = model(x)
+        meter.update(time.time() - t)
+
+    return meter.avg
