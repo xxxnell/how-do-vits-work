@@ -49,6 +49,9 @@ class BasicBlock(nn.Module):
 
         return x
 
+    def extra_repr(self):
+        return "rate=%.3e" % self.rate
+
 
 class Bottleneck(nn.Module):
     expansion = 4
@@ -98,3 +101,6 @@ class Bottleneck(nn.Module):
         x = skip + x
 
         return x
+
+    def extra_repr(self):
+        return "rate=%.3e" % self.rate

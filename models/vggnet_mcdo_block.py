@@ -21,3 +21,6 @@ class BasicBlock(nn.Module):
         x = F.dropout(x, p=self.rate)
 
         return x
+
+    def extra_repr(self):
+        return "rate=%.3e" % self.rate
