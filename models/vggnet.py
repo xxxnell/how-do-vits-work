@@ -123,25 +123,25 @@ def mcdo_19(num_classes=10, name="vgg_mcdo_19", **block_kwargs):
 
 def dnn_smooth_11(num_classes=10, name="vgg_dnn_smoothing_11", **block_kwargs):
     return VGGNet(vggnet_dnn.BasicBlock, [1, 1, 2, 2, 2],
-                  sblock=smoothing.SigmoidBlurBlock, num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
 def dnn_smooth_13(num_classes=10, name="vgg_dnn_smoothing_13", **block_kwargs):
     return VGGNet(vggnet_dnn.BasicBlock, [2, 2, 2, 2, 2],
-                  sblock=smoothing.SigmoidBlurBlock, num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
 def dnn_smooth_16(num_classes=10, name="vgg_dnn_smoothing_16", **block_kwargs):
     return VGGNet(vggnet_dnn.BasicBlock, [2, 2, 3, 3, 3],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
 def dnn_smooth_19(num_classes=10, name="vgg_dnn_smoothing_19", **block_kwargs):
     return VGGNet(vggnet_dnn.BasicBlock, [2, 2, 4, 4, 4],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
@@ -149,23 +149,23 @@ def dnn_smooth_19(num_classes=10, name="vgg_dnn_smoothing_19", **block_kwargs):
 
 def mcdo_smooth_11(num_classes=10, name="vgg_mcdo_smoothing_11", **block_kwargs):
     return VGGNet(vggnet_mcdo.BasicBlock, [1, 1, 2, 2, 2],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
 def mcdo_smooth_13(num_classes=10, name="vgg_mcdo_smoothing_13", **block_kwargs):
     return VGGNet(vggnet_mcdo.BasicBlock, [2, 2, 2, 2, 2],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
 def mcdo_smooth_16(num_classes=10, name="vgg_mcdo_smoothing_16", **block_kwargs):
     return VGGNet(vggnet_mcdo.BasicBlock, [2, 2, 3, 3, 3],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)
 
 
 def mcdo_smooth_19(num_classes=10, name="vgg_mcdo_smoothing_19", **block_kwargs):
     return VGGNet(vggnet_mcdo.BasicBlock, [2, 2, 4, 4, 4],
-                  sblock=smoothing.SigmoidBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
+                  sblock=smoothing.TanhBlurBlock, sfilter=[1, 1], num_sblocks=[1, 1, 1, 1, 1],
                   num_classes=num_classes, name=name, **block_kwargs)

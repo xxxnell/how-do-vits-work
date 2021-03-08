@@ -20,7 +20,7 @@ def convnxn(in_channels, out_channels, kernel_size, stride=1, groups=1, padding=
 
 
 def relu():
-    return nn.ReLU(inplace=True)
+    return nn.ReLU()
 
 
 def bn(channels):

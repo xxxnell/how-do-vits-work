@@ -62,31 +62,31 @@ def mcdo_152(num_classes=10, tiny=False, name="preresnet_mcdo_152", **block_kwar
 
 def dnn_smooth_18(num_classes=10, tiny=False, name="preresnet_dnn_smoothing_18", **block_kwargs):
     return resnet.ResNet(preresnet_dnn.BasicBlock, [2, 2, 2, 2],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_34(num_classes=10, tiny=False, name="preresnet_dnn_smoothing_34", **block_kwargs):
     return resnet.ResNet(preresnet_dnn.BasicBlock, [3, 4, 6, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_50(num_classes=10, tiny=False, name="preresnet_dnn_smoothing_50", **block_kwargs):
     return resnet.ResNet(preresnet_dnn.Bottleneck, [3, 4, 6, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_101(num_classes=10, tiny=False, name="preresnet_dnn_smoothing_101", **block_kwargs):
     return resnet.ResNet(preresnet_dnn.Bottleneck, [3, 4, 23, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_152(num_classes=10, tiny=False, name="preresnet_dnn_smoothing_152", **block_kwargs):
     return resnet.ResNet(preresnet_dnn.Bottleneck, [3, 8, 36, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
@@ -94,29 +94,29 @@ def dnn_smooth_152(num_classes=10, tiny=False, name="preresnet_dnn_smoothing_152
 
 def mcdo_smooth_18(num_classes=10, tiny=False, name="preresnet_mcdo_smoothing_18", **block_kwargs):
     return resnet.ResNet(preresnet_mcdo.BasicBlock, [2, 2, 2, 2],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_34(num_classes=10, tiny=False, name="preresnet_mcdo_smoothing_34", **block_kwargs):
     return resnet.ResNet(preresnet_mcdo.BasicBlock, [3, 4, 6, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_50(num_classes=10, tiny=False, name="preresnet_mcdo_smoothing_50", **block_kwargs):
     return resnet.ResNet(preresnet_mcdo.Bottleneck, [3, 4, 6, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_101(num_classes=10, tiny=False, name="preresnet_mcdo_smoothing_101", **block_kwargs):
     return resnet.ResNet(preresnet_mcdo.Bottleneck, [3, 4, 23, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_152(num_classes=10, tiny=False, name="preresnet_mcdo_smoothing_152", **block_kwargs):
     return resnet.ResNet(preresnet_mcdo.Bottleneck, [3, 8, 36, 3],
-                         sblock=smoothing.PreSigmoidBlurBlock, num_sblocks=[1, 1, 1, 1],
+                         sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
                          num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
