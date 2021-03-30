@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 
 import torch
+import torch.nn as nn
 import models.layers as layers
 import models.alexnet as alexnet
 import models.vggnet as vgg
@@ -190,11 +191,10 @@ def save(model, dataset_name, uid, optimizer=None, root="models_checkpoints"):
     save_path = os.path.join(checkpoint_path, "%s_%s_%s.pth.tar" % (dataset_name, model.name, uid))
     save_obj = {
         "name": model.name,
-        "state_dict": model.state_dict(),
+        "state_dict": model.state_dict() if type(model) is not nn.DataParallel else model.module.state_dict(),
     }
     if optimizer is not None:
         save_obj["optimizer"] = optimizer.state_dict()
-
     torch.save(save_obj, save_path)
 
 
