@@ -37,7 +37,7 @@ class AverageMeter(object):
         self.count += np.array(xs).size
 
         self.avg = self.sum / self.count
-        self.std = math.sqrt(self.sqsum / self.count - self.avg * self.avg)
+        self.std = math.sqrt(max(self.sqsum / self.count - self.avg * self.avg, 0.0))
 
     def result(self):
         return self.avg
