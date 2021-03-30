@@ -11,7 +11,7 @@ class ResNet(nn.Module):
 
     def __init__(self,
                  block, num_blocks,
-                 sblock=smoothing.SigmoidBlurBlock, num_sblocks=(0, 0, 0, 0),
+                 sblock=smoothing.TanhBlurBlock, num_sblocks=(0, 0, 0, 0),
                  cblock=classifier.GAPBlock,
                  num_classes=10, tiny=False, name="resnet", **block_kwargs):
         super(ResNet, self).__init__()
@@ -143,31 +143,31 @@ def mcdo_152(num_classes=10, tiny=False, name="resnet_mcdo_152", **block_kwargs)
 
 def dnn_smooth_18(num_classes=10, tiny=False, name="resnet_dnn_smoothing_18", **block_kwargs):
     return ResNet(resnet_dnn.BasicBlock, [2, 2, 2, 2],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_34(num_classes=10, tiny=False, name="resnet_dnn_smoothing_34", **block_kwargs):
     return ResNet(resnet_dnn.BasicBlock, [3, 4, 6, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_50(num_classes=10, tiny=False, name="resnet_dnn_smoothing_50", **block_kwargs):
     return ResNet(resnet_dnn.Bottleneck, [3, 4, 6, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_101(num_classes=10, tiny=False, name="resnet_dnn_smoothing_101", **block_kwargs):
     return ResNet(resnet_dnn.Bottleneck, [3, 4, 23, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def dnn_smooth_152(num_classes=10, tiny=False, name="resnet_dnn_smoothing_152", **block_kwargs):
     return ResNet(resnet_dnn.Bottleneck, [3, 8, 36, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
@@ -175,29 +175,29 @@ def dnn_smooth_152(num_classes=10, tiny=False, name="resnet_dnn_smoothing_152", 
 
 def mcdo_smooth_18(num_classes=10, tiny=False, name="resnet_mcdo_smoothing_18", **block_kwargs):
     return ResNet(resnet_mcdo.BasicBlock, [2, 2, 2, 2],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_34(num_classes=10, tiny=False, name="resnet_mcdo_smoothing_34", **block_kwargs):
     return ResNet(resnet_mcdo.BasicBlock, [3, 4, 6, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_50(num_classes=10, tiny=False, name="resnet_mcdo_smoothing_50", **block_kwargs):
     return ResNet(resnet_mcdo.Bottleneck, [3, 4, 6, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_101(num_classes=10, tiny=False, name="resnet_mcdo_smoothing_101", **block_kwargs):
     return ResNet(resnet_mcdo.Bottleneck, [3, 4, 23, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth_152(num_classes=10, tiny=False, name="resnet_mcdo_smoothing_152", **block_kwargs):
     return ResNet(resnet_mcdo.Bottleneck, [3, 8, 36, 3],
-                  sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1, 1],
+                  num_sblocks=[1, 1, 1, 1],
                   num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)

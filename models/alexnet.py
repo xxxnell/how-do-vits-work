@@ -9,7 +9,7 @@ import models.classifier_block as classifier
 class AlexNet(nn.Module):
 
     def __init__(self, block,
-                 sblock=smoothing.SigmoidBlurBlock, num_sblocks=(0, 0, 0),
+                 sblock=smoothing.TanhBlurBlock, num_sblocks=(0, 0, 0),
                  cblock=classifier.MLPBlock,
                  num_classes=10, tiny=False, name="alexnet", **block_kwargs):
         super(AlexNet, self).__init__()
@@ -80,12 +80,12 @@ def mcdo(num_classes=10, tiny=False, name="alexnet_mcdo", **block_kwargs):
 
 def dnn_smooth(num_classes=10, tiny=False, name="alexnet_dnn_smoothing", **block_kwargs):
     return AlexNet(alexnet_dnn.BasicBlock,
-                   sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1],
+                   num_sblocks=[1, 1, 1],
                    num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
 
 def mcdo_smooth(num_classes=10, tiny=False, name="alexnet_mcdo_smoothing", **block_kwargs):
     return AlexNet(alexnet_mcdo.BasicBlock,
-                   sblock=smoothing.TanhBlurBlock, num_sblocks=[1, 1, 1],
+                   num_sblocks=[1, 1, 1],
                    num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
 
