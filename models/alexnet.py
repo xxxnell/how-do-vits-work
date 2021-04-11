@@ -20,16 +20,18 @@ class AlexNet(nn.Module):
         if not tiny:
             self.layer0.append(block(3, 64, kernel_size=11, stride=4, padding=2, **block_kwargs))
         else:
-            self.layer0.append(block(3, 64, kernel_size=3, stride=1, padding=1, **block_kwargs))
+            self.layer0.append(block(3, 64, kernel_size=3, stride=2, padding=1, **block_kwargs))
         self.layer0 = nn.Sequential(*self.layer0)
 
         self.layer1 = []
-        self.layer1.append(nn.MaxPool2d(kernel_size=3, stride=2))
+        kernel_size = 3 if not tiny else 2
+        self.layer1.append(nn.MaxPool2d(kernel_size=kernel_size, stride=2))
         self.layer1.append(block(64, 192, kernel_size=(5, 5), padding=2, **block_kwargs))
         self.layer1 = nn.Sequential(*self.layer1)
 
         self.layer2 = []
-        self.layer2.append(nn.MaxPool2d(kernel_size=3, stride=2))
+        kernel_size = 3 if not tiny else 2
+        self.layer2.append(nn.MaxPool2d(kernel_size=kernel_size, stride=2))
         self.layer2.append(block(192, 384, kernel_size=3, padding=1, **block_kwargs))
         self.layer2.append(block(384, 256, kernel_size=3, padding=1, **block_kwargs))
         self.layer2.append(block(256, 256, kernel_size=3, padding=1, **block_kwargs))
@@ -41,9 +43,10 @@ class AlexNet(nn.Module):
 
         self.classifier = []
         if cblock is classifier.MLPBlock:
-            self.classifier.append(nn.MaxPool2d(kernel_size=3, stride=2))
-            self.classifier.append(nn.AdaptiveAvgPool2d((6, 6)))
-            self.classifier.append(cblock(6 * 6 * 256, num_classes, **block_kwargs))
+            kernel_size, out_size = (3, 6) if not tiny else (2, 2)
+            self.classifier.append(nn.MaxPool2d(kernel_size=kernel_size, stride=2))
+            self.classifier.append(nn.AdaptiveAvgPool2d((out_size, out_size)))
+            self.classifier.append(cblock(out_size * out_size * 256, num_classes, **block_kwargs))
         else:
             self.classifier.append(cblock(256, num_classes, **block_kwargs))
         self.classifier = nn.Sequential(*self.classifier)
