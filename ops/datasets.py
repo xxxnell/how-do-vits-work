@@ -3,16 +3,19 @@ import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+
 
 import ops.cifarc as cifarc
 
 
-def get_dataset(name,
-                root="./data", download=False, **kwargs):
+def get_dataset(name, root="./data", download=False, **kwargs):
     if name in ["cifar", "cifar10", "cifar-10"]:
         dataset_train, dataset_test = get_cifar10(root=root, download=download, **kwargs)
     elif name in ["cifar100", "cifar-100"]:
         dataset_train, dataset_test = get_cifar100(root=root, download=download, **kwargs)
+    elif name in ["imagenet"]:
+        dataset_train, dataset_test = get_imagenet(root=root, **kwargs)
     else:
         raise NotImplementedError
     return dataset_train, dataset_test
@@ -52,6 +55,31 @@ def get_cifar100(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761), pa
 
     dataset_train = torchvision.datasets.CIFAR100(root=root, train=True, download=download, transform=transform_train)
     dataset_test = torchvision.datasets.CIFAR100(root=root, train=False, download=download, transform=transform_test)
+
+    return dataset_train, dataset_test
+
+
+def get_imagenet(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                 root="./data"):
+    transform_train = transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+
+    transform_test = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean, std),
+    ])
+
+    train_dir = os.path.join(root, 'train')
+    test_dir = os.path.join(root, 'val')
+
+    dataset_train = datasets.ImageFolder(train_dir, transform_train)
+    dataset_test = datasets.ImageFolder(test_dir, transform_test)
 
     return dataset_train, dataset_test
 
