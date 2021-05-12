@@ -7,6 +7,7 @@ import torch.nn as nn
 import models.layers as layers
 import models.alexnet as alexnet
 import models.vggnet as vgg
+import models.prevggnet as prevgg
 import models.resnet as resnet
 import models.preresnet as preresnet
 import models.resnext as resnext
@@ -58,6 +59,39 @@ def get_model(name, num_classes=10, tiny=False, verbose=True, **block_kwargs):
         model = vgg.dnn_smooth_19(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_smoothing_19"]:
         model = vgg.mcdo_smooth_19(num_classes=num_classes, name=name, **block_kwargs)
+    # PreAct VGG
+    elif name in ["prevgg_dnn_11"]:
+        model = prevgg.dnn_11(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_11"]:
+        model = prevgg.mcdo_11(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_dnn_smoothing_11"]:
+        model = prevgg.dnn_smooth_11(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_smoothing_11"]:
+        model = prevgg.mcdo_smooth_11(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_dnn_13"]:
+        model = prevgg.dnn_13(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_13"]:
+        model = prevgg.mcdo_13(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_dnn_smoothing_13"]:
+        model = prevgg.dnn_smooth_13(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_smoothing_13"]:
+        model = prevgg.mcdo_smooth_13(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_dnn_16"]:
+        model = prevgg.dnn_16(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_16"]:
+        model = prevgg.mcdo_16(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_dnn_smoothing_16"]:
+        model = prevgg.dnn_smooth_16(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_smoothing_16"]:
+        model = prevgg.mcdo_smooth_16(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_dnn_19"]:
+        model = prevgg.dnn_19(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_19"]:
+        model = prevgg.mcdo_19(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_dnn_smoothing_19"]:
+        model = prevgg.dnn_smooth_19(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["prevgg_mcdo_smoothing_19"]:
+        model = prevgg.mcdo_smooth_19(num_classes=num_classes, name=name, **block_kwargs)
     # ResNet
     elif name in ["resnet_dnn_18"]:
         model = resnet.dnn_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
