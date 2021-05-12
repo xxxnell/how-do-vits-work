@@ -6,7 +6,7 @@ import models.layers as layers
 
 class BasicBlock(nn.Module):
 
-    def __init__(self, in_channels, channels, kernel_size, stride=1, padding=0, rate=0.3, **block_kwargs):
+    def __init__(self, in_channels, channels, kernel_size, stride=1, padding=0, rate=0.1, **block_kwargs):
         super(BasicBlock, self).__init__()
 
         self.rate = rate
