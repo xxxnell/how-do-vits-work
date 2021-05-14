@@ -19,7 +19,6 @@ class BasicBlock(nn.Module):
         self.shortcut = []
         if stride != 1 or in_channels != channels * self.expansion:
             self.shortcut.append(layers.conv1x1(in_channels, channels * self.expansion, stride=stride))
-            self.shortcut.append(layers.bn(channels * self.expansion))
 
         self.shortcut = nn.Sequential(*self.shortcut)
         self.bn1 = layers.bn(in_channels)

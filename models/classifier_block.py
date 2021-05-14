@@ -19,6 +19,26 @@ class GAPBlock(nn.Module):
 
         return x
 
+    
+class BNGAPBlock(nn.Module):
+
+    def __init__(self, in_features, num_classes, **kwargs):
+        super(BNGAPBlock, self).__init__()
+
+        self.bn = layers.bn(in_features)
+        self.relu = layers.relu()
+        self.gap = nn.AdaptiveAvgPool2d((1, 1))
+        self.dense = layers.dense(in_features, num_classes)
+
+    def forward(self, x):
+        x = self.bn(x)
+        x = self.relu(x)
+        x = self.gap(x)
+        x = x.view(x.size()[0], -1)
+        x = self.dense(x)
+
+        return x
+
 
 class MLPBlock(nn.Module):
 
