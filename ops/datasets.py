@@ -1,3 +1,4 @@
+import os
 import numpy as np
 
 import torch
@@ -5,8 +6,8 @@ import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-
 import ops.cifarc as cifarc
+import ops.cifarp as cifarp
 
 
 def get_dataset(name, root="./data", download=False, **kwargs):
@@ -118,3 +119,17 @@ def get_cifar100c(ctype, intensity, mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 
 
     return cifarc.CIFAR100C(root, ctype, intensity, transform=transform, download=download)
 
+
+def get_cifar10p(ptype, mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010),
+                 root="./data", base_folder="cifar-10-p", download=False):
+    transform = transforms.Compose([
+        cifarp.ToTensor(),
+        cifarp.Normalize(mean, std),
+    ])
+
+    return cifarp.CIFAR10P(root=root, ptype=ptype, base_folder=base_folder,
+                    transform=transform, download=download)
+
+
+def get_perturbations():
+    return cifarp.CIFAR10P.perturbation_list

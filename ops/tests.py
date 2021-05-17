@@ -116,21 +116,38 @@ def repr_metrics(metrics):
     return ", ".join(metrics_reprs)
 
 
-def save_metrics(metrics_dir, metrics_list):
-    with open(metrics_dir, 'w') as csvfile:
-        writer = csv.writer(csvfile)
-        for metrics in metrics_list:
-            *keys, \
-            nll_value, \
-            cutoffs, cms, accs, uncs, ious, freqs, \
-            topk_value, brier_value, \
-            count_bin, acc_bin, conf_bin, ece_value = metrics
+@torch.no_grad()
+def test_perturbation(dataset, model, n_ff):
+    model = model.eval()
+    model = model.cuda()
 
-            writer.writerow([
-                *keys,
-                nll_value, *cutoffs, *accs, *uncs, *ious, *freqs,
-                topk_value, brier_value, ece_value
-            ])
+    cons_meter = meters.AverageMeter("cons")
+    cec_meter = meters.AverageMeter("cec")
+    for xs, ys in dataset:
+        xs = xs.cuda()
+
+        b, _, _, _, _ = xs.shape
+        xs = xs.reshape([-1, 3, 32, 32])
+
+        ys_pred = torch.stack([model(xs) for _ in range(n_ff)])
+        ys_pred = torch.softmax(ys_pred, dim=-1)
+        ys_pred = torch.mean(ys_pred, dim=0)
+
+        xs = xs.reshape([b, -1, 3, 32, 32])
+        ys_pred = ys_pred.reshape([b, -1, 10])
+
+        # Consistency
+        index = torch.argmax(ys_pred, dim=-1)
+        cons = index[:, 1:] == index[:, :-1]
+        cons = torch.mean(cons.float(), dim=-1)
+        cons_meter.update(cons.cpu().numpy())
+
+        # CEC
+        cec = ys_pred[:, 1:] * torch.log(ys_pred[:, :-1])
+        cec = - torch.mean(cec, dim=-1)
+        cec_meter.update(cec.cpu().numpy())
+
+    return cons_meter.avg, cec_meter.avg
 
 
 @torch.no_grad()
@@ -152,6 +169,31 @@ def test_prediction_time(model, n_ff, input_size, n=100, gpu=True):
           (predict_times.avg * 1e3, predict_times.std * 1e3))
 
     return predict_times
+
+
+def save_lists(metrics_dir, metrics_list):
+    with open(metrics_dir, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        for metrics in metrics_list:
+            writer.writerow(metrics)
+
+
+def save_metrics(metrics_dir, metrics_list):
+    metrics_acc = []
+    for metrics in metrics_list:
+        *keys, \
+        nll_value, \
+        cutoffs, cms, accs, uncs, ious, freqs, \
+        topk_value, brier_value, \
+        count_bin, acc_bin, conf_bin, ece_value = metrics
+
+        metrics_acc.append([
+            *keys,
+            nll_value, *cutoffs, *accs, *uncs, *ious, *freqs,
+            topk_value, brier_value, ece_value
+        ])
+
+    save_lists(metrics_dir, metrics_acc)
 
 
 def brier(ys, ys_pred):
