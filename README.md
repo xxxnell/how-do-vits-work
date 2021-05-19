@@ -17,6 +17,7 @@ This repository provides a PyTorch implimentation of "Blurs Make Results Clearer
 
 The figure above shows the predictive performance of ResNet-18 on CIFAR-100. In this figure, MC dropout reqiures an ensemble size of fifty to achieve high predictive performance. The predictive performance of "MC dropout + spatial smoothing" with ensemble size of two is comparable to that of the vanilla MC dropout with ensemble size of fifty. In addition, the spatial smoothing also improves deterministic NN.
 
+We also discuss global average pooling (GAP), pre-activation, and ReLU6 as special cases of the spatial smoothing in the paper. Experiments show that they improve uncertainty as well as robustness.
 
 
 ## Getting Started 
@@ -72,7 +73,7 @@ Refer to ```losslandscape.ipynb``` for exploring the loss landscapes. It require
   </tr>
 </table>
 
-The figure above shows the loss landscapes of ResNet-18 with MC dropout  on CIFAR-100. These loss landscapes fluctuate due to the randomness of the MC dropout. 
+The figure above shows the loss landscapes of ResNet-18 with MC dropout  on CIFAR-100. These loss landscapes fluctuate due to the randomness of MC dropout. 
 
 The left of the figure is the loss landscape of the model using MLP classifier instead of GAP classifier. The loss landscape is chaotic and irregular, resulting in hindering and destabilizing NN optimization. The middle of the figure is loss landscape of ResNet with GAP classifier. Since GAP ensembles all of the feature map points, it flattens and stabilizes the loss landscape. Likewise, as shown in the right of the figure, the spatial smoothing also flattens and stabilizes the loss landscape. Accordingly, the predictive performance of GAP classifier with the spatial smoothing is the best, and that of MLP classifier is the worst.
 
