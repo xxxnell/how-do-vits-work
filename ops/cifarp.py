@@ -8,6 +8,8 @@ import torchvision.transforms as transforms
 from torchvision.datasets.vision import VisionDataset
 from torchvision.datasets.utils import check_integrity, download_and_extract_archive
 
+import ops.datasets as datasets
+
 
 class ToTensor:
 
@@ -58,10 +60,7 @@ class CIFAR10P(VisionDataset):
     url = "https://zenodo.org/record/2535967/files/CIFAR-10-P.tar"
     filename = "cifar-10-p-python.tar"
     tgz_md5 = "125d6775afc5846ea84584d7524dedff"
-    perturbation_list = [
-        "gaussian_noise", "shot_noise", "motion_blur", "zoom_blur",
-        "spatter", "brightness", "translate", "rotate", "tilt", "scale",
-    ]
+
 
     def __init__(
             self,
@@ -84,10 +83,10 @@ class CIFAR10P(VisionDataset):
             raise RuntimeError("Dataset not found or perturbated." +
                                " You can use download=True to download it")
 
-        if ptype not in self.perturbation_list:
+        if ptype not in datasets.get_perturbations():
             raise ValueError("Perturbation type %s is not provided. " % ptype +
                              "You must choose one of the following types: " +
-                             ", ".join(self.perturbation_list))
+                             ", ".join(datasets.get_perturbations()))
 
         self.data: Any = []
         self.targets = []
@@ -119,7 +118,7 @@ class CIFAR10P(VisionDataset):
         return len(self.data)
 
     def _check_integrity(self) -> bool:
-        for pname in self.perturbation_list:
+        for pname in datasets.get_perturbations():
             fpath = os.path.join(self.root, self.base_folder, "%s.npy" % pname)
             if not check_integrity(fpath):
                 return False
@@ -130,6 +129,3 @@ class CIFAR10P(VisionDataset):
             print('Files already downloaded and verified')
             return
         download_and_extract_archive(self.url, self.root, filename=self.filename, md5=self.tgz_md5)
-
-
-

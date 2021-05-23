@@ -15,6 +15,7 @@
         "n_ff": 1
     },
     "model": {
+        "tiny": false,
         "block": {}
     },
     "optim": {

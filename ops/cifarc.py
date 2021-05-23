@@ -6,6 +6,8 @@ from typing import Any, Callable, Optional, Tuple
 from torchvision.datasets.vision import VisionDataset
 from torchvision.datasets.utils import check_integrity, download_and_extract_archive
 
+import ops.datasets as datasets
+
 
 class CIFAR10C(VisionDataset):
     """
@@ -28,27 +30,6 @@ class CIFAR10C(VisionDataset):
     root = "./data"
     filename = "cifar-10-c-python.tar"
     tgz_md5 = "56bf5dcef84df0e2308c6dcbcbbd8499"
-    corruption_list = [
-        "zoom_blur",
-        "brightness",
-        "contrast",
-        "defocus_blur",
-        "elastic_transform",
-        "fog",
-        "frost",
-        "gaussian_blur",
-        "gaussian_noise",
-        "glass_blur",
-        "impulse_noise",
-        "jpeg_compression",
-        "motion_blur",
-        "pixelate",
-        "saturate",
-        "shot_noise",
-        "snow",
-        "spatter",
-        "speckle_noise",
-    ]
 
     def __init__(
             self,
@@ -71,10 +52,10 @@ class CIFAR10C(VisionDataset):
             raise RuntimeError("Dataset not found or corrupted." +
                                " You can use download=True to download it")
 
-        if ctype not in self.corruption_list:
+        if ctype not in datasets.get_corruptions(extra=True):
             raise ValueError("Corruption type %s is not provided. " % ctype +
                              "You must choose one of the following types: " +
-                             ", ".join(self.corruption_list))
+                             ", ".join(datasets.get_corruptions(extra=True)))
 
         self.data: Any = []
         self.targets = []
@@ -110,7 +91,7 @@ class CIFAR10C(VisionDataset):
         return len(self.data)
 
     def _check_integrity(self) -> bool:
-        for cname in self.corruption_list:
+        for cname in datasets.get_corruptions(extra=True):
             fpath = os.path.join(self.root, self.base_folder, "%s.npy" % cname)
             if not check_integrity(fpath):
                 return False

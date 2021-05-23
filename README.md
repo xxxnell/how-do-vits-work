@@ -15,7 +15,7 @@ This repository provides a PyTorch implimentation of "Blurs Make Results Clearer
   </tr>
 </table>
 
-The figure above shows the predictive performance of ResNet-18 on CIFAR-100. In this figure, MC dropout reqiures an ensemble size of fifty to achieve high predictive performance. The predictive performance of "MC dropout + spatial smoothing" with ensemble size of two is comparable to that of the vanilla MC dropout with ensemble size of fifty. In addition, the spatial smoothing also improves deterministic NN.
+The figure above shows the predictive performance of ResNet-18 on CIFAR-100. In this figure, MC dropout reqiures an ensemble size of fifty to achieve high predictive performance. The predictive performance of "MC dropout + spatial smoothing" with ensemble size of two is comparable to that of the vanilla MC dropout with ensemble size of fifty. In addition, the spatial smoothing also improves deterministic NN, and it consistently improves the predictive performance on ImageNet.
 
 We also discuss global average pooling (GAP), pre-activation, and ReLU6 as special cases of the spatial smoothing in the paper. Experiments show that they improve uncertainty as well as robustness.
 
@@ -31,14 +31,15 @@ The following packages are required:
 * tensorboard
 * seaborn (optional)
 
-See ```cifar.ipynb``` for image classification. Run all cells to train and test models on CIFAR-10 and CIFAR-100. It provides AlexNet, VGG, pre-activation VGG, ResNet, pre-activation ResNet, ResNeXt, WideResNet by default. Bayesian NNs contains MC dropout layers. 
-
+See ```classification.ipynb``` for image classification. Run all cells to train and test models on CIFAR-10 and CIFAR-100. It provides AlexNet, VGG, pre-activation VGG, ResNet, pre-activation ResNet, ResNeXt, WideResNet by default. Bayesian NNs contains MC dropout layers. 
 
 <p align="center">
 <img src="resources/performance/featured.png" width=500 align="center">
 </p>
 
-We provide several metrics for measuring accuracy and uncertainty: Acuracy (Acc) and Acc for certain results (Acc-90), negative log-likelihood (NLL), Expected Calibration Error (ECE), Intersection-over-Union (IoU) and IoU for certain results (IoU-90), Unconfidence (Unc-90), and Frequency for certain results (Freq-90). We also define a method to plot a reliability diagram for visualization.
+The figure above shows the predictive performance on CIFAR-100 meaning that the spatial smoothing improves accuracy as well as uncertainty.
+
+We provide several metrics for measuring accuracy and uncertainty: Acuracy (Acc, ↑) and Acc for certain results (Acc-90, ↑), negative log-likelihood (NLL, ↓), Expected Calibration Error (ECE, ↓), Intersection-over-Union (IoU, ↑) and IoU for certain results (IoU-90, ↑), Unconfidence (Unc-90, ↑), and Frequency for certain results (Freq-90, ↑). We also define a method to plot a reliability diagram for visualization.
 
 It is easy to use deep ensemble as follows:
 
@@ -73,11 +74,11 @@ Refer to ```losslandscape.ipynb``` for exploring the loss landscapes. It require
   </tr>
 </table>
 
-The figure above shows the loss landscapes of ResNet-18 with MC dropout  on CIFAR-100. These loss landscapes fluctuate due to the randomness of MC dropout. 
+The figure above shows the loss landscapes of ResNet-18 with MC dropout on CIFAR-100. These loss landscapes fluctuate due to the randomness of MC dropout. 
 
-The left of the figure is the loss landscape of the model using MLP classifier instead of GAP classifier. The loss landscape is chaotic and irregular, resulting in hindering and destabilizing NN optimization. The middle of the figure is loss landscape of ResNet with GAP classifier. Since GAP ensembles all of the feature map points, it flattens and stabilizes the loss landscape. Likewise, as shown in the right of the figure, the spatial smoothing also flattens and stabilizes the loss landscape. Accordingly, the predictive performance of GAP classifier with the spatial smoothing is the best, and that of MLP classifier is the worst.
+The *left* of the figure is the loss landscape of the model using MLP classifier instead of GAP classifier. The loss landscape is chaotic and irregular, resulting in hindering and destabilizing NN optimization. The *middle* of the figure is loss landscape of ResNet with GAP classifier. Since GAP ensembles all of the feature map points, it flattens and stabilizes the loss landscape. Likewise, as shown in the *right* of the figure, the spatial smoothing also flattens and stabilizes the loss landscape. Accordingly, the predictive performance of GAP classifier with the spatial smoothing is the best, and that of MLP classifier is the worst.
 
-In conclusion, **averaging feature map points tends to help neural network optimization by smoothing, flattening, and stabilizing the loss landscape.** We observe the same phenomenon for determinisitc NNs.
+In conclusion, **averaging feature map points tends to help neural network optimization by smoothing, flattening, and stabilizing the loss landscape.** We observe the same phenomenon for deterministic NNs.
 
 
 
@@ -108,15 +109,16 @@ Refer to ```robustness.ipynb``` for evaluation corruption robustness on CIFAR-10
 The figure above shows predictive performance of ResNet-18 on CIFAR-100-C. This figure shows that the spatial smoothing improves the predictive performance for corrupted data. Moreover, it indoubtedly helps in predicting reliable uncertainty.
 
 
-
 ## How to apply the spatial smoothing to your own model
 
 The spatial smoothing consists of three simple components: temperature-scaled tanh which is t * tanh(· / t) ⸺ ReLU ⸺ AvgPool with kernel size of 2 and stride of 1. "t" is a hyperparameter and this value defaults to 10. See the [TanhBlurBlock](models/smoothing_block.py). The module is added before each subsampling layer. For example, see the [ResNet](models/resnet.py).
 
-
 <p align="center">
 <img src="resources/diagrams/smooth.png" height=280 align="center">
 </p>
+
+Above all things, use GAP (instead of MLP, global max pooling, or even CLS token) for classification tasks!
+
 
 ## License
 
