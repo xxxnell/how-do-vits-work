@@ -15,9 +15,9 @@ This repository provides a PyTorch implimentation of "Blurs Make Results Clearer
   </tr>
 </table>
 
-The figure above shows the predictive performance of ResNet-18 on CIFAR-100. In this figure, MC dropout reqiures an ensemble size of fifty to achieve high predictive performance. The predictive performance of "MC dropout + spatial smoothing" with ensemble size of two is comparable to that of the vanilla MC dropout with ensemble size of fifty. In addition, the spatial smoothing also improves deterministic NN, and it consistently improves the predictive performance on ImageNet.
+The figure above shows the predictive performance of ResNet-18 on CIFAR-100. In this figure, MC dropout reqiures an ensemble size of fifty to achieve high predictive performance. The predictive performance of "MC dropout + spatial smoothing" with ensemble size of two is comparable to that of the vanilla MC dropout with ensemble size of fifty. In addition, the spatial smoothing also improves deterministic NN. In the paper, we show that it consistently improves the predictive performance on ImageNet.
 
-We also discuss global average pooling (GAP), pre-activation, and ReLU6 as special cases of the spatial smoothing in the paper. Experiments show that they improve uncertainty as well as robustness.
+We also discuss global average pooling (GAP), pre-activation, and ReLU6 as special cases of the spatial smoothing. Experiments show that they improve uncertainty as well as robustness.
 
 
 ## Getting Started 
@@ -49,7 +49,7 @@ import models.ensemble as ensemble
 
 model_list = []
 for uid in uids:  # trained models are required
-    model = models.get_model(name="resnet_dnn_18", num_classes=100, tiny=True)
+    model = models.get_model(name="resnet_dnn_18", num_classes=100, stem=True)
     models.load(model, dataset_name="cifar_100", uid=uid)
     model_list.append(model)
 model = ensemble.Ensemble(model_list)

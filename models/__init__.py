@@ -16,16 +16,16 @@ import models.wideresnet as wideresnet
 import ops.meters as meters
 
 
-def get_model(name, num_classes=10, tiny=False, verbose=True, **block_kwargs):
+def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     # AlexNet
     if name in ["alexnet_dnn"]:
-        model = alexnet.dnn(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = alexnet.dnn(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["alexnet_mcdo"]:
-        model = alexnet.mcdo(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = alexnet.mcdo(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["alexnet_dnn_smoothing"]:
-        model = alexnet.dnn_smooth(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = alexnet.dnn_smooth(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["alexnet_mcdo_smoothing"]:
-        model = alexnet.mcdo_smooth(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = alexnet.mcdo_smooth(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # VGG
     elif name in ["vgg_dnn_11"]:
         model = vgg.dnn_11(num_classes=num_classes, name=name, **block_kwargs)
@@ -94,124 +94,124 @@ def get_model(name, num_classes=10, tiny=False, verbose=True, **block_kwargs):
         model = prevgg.mcdo_smooth_19(num_classes=num_classes, name=name, **block_kwargs)
     # ResNet
     elif name in ["resnet_dnn_18"]:
-        model = resnet.dnn_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_18"]:
-        model = resnet.mcdo_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_smoothing_18"]:
-        model = resnet.dnn_smooth_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_18"]:
-        model = resnet.mcdo_smooth_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_34"]:
-        model = resnet.dnn_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_34"]:
-        model = resnet.mcdo_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_smoothing_34"]:
-        model = resnet.dnn_smooth_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_34"]:
-        model = resnet.mcdo_smooth_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_50"]:
-        model = resnet.dnn_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_50"]:
-        model = resnet.mcdo_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_smoothing_50"]:
-        model = resnet.dnn_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_50"]:
-        model = resnet.mcdo_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_101"]:
-        model = resnet.dnn_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_101"]:
-        model = resnet.mcdo_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_smoothing_101"]:
-        model = resnet.dnn_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_101"]:
-        model = resnet.mcdo_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_152"]:
-        model = resnet.dnn_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_152"]:
-        model = resnet.mcdo_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_dnn_smoothing_152"]:
-        model = resnet.dnn_smooth_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.dnn_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_152"]:
-        model = resnet.mcdo_smooth_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # PreAct ResNet
     elif name in ["preresnet_dnn_18"]:
-        model = preresnet.dnn_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_18"]:
-        model = preresnet.mcdo_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_smoothing_18"]:
-        model = preresnet.dnn_smooth_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_18"]:
-        model = preresnet.mcdo_smooth_18(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_34"]:
-        model = preresnet.dnn_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_34"]:
-        model = preresnet.mcdo_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_smoothing_34"]:
-        model = preresnet.dnn_smooth_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_34"]:
-        model = preresnet.mcdo_smooth_34(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_50"]:
-        model = preresnet.dnn_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_50"]:
-        model = preresnet.mcdo_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_smoothing_50"]:
-        model = preresnet.dnn_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_50"]:
-        model = preresnet.mcdo_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_101"]:
-        model = preresnet.dnn_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_101"]:
-        model = preresnet.mcdo_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_smoothing_101"]:
-        model = preresnet.dnn_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_101"]:
-        model = preresnet.mcdo_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_152"]:
-        model = preresnet.dnn_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_152"]:
-        model = preresnet.mcdo_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_dnn_smoothing_152"]:
-        model = preresnet.dnn_smooth_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.dnn_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_152"]:
-        model = preresnet.mcdo_smooth_152(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = preresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # ResNeXt
     elif name in ["resnext_dnn_50"]:
-        model = resnext.dnn_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_mcdo_50"]:
-        model = resnext.mcdo_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_dnn_smoothing_50"]:
-        model = resnext.dnn_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_mcdo_smoothing_50"]:
-        model = resnext.mcdo_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_dnn_101"]:
-        model = resnext.dnn_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_mcdo_101"]:
-        model = resnext.mcdo_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_dnn_smoothing_101"]:
-        model = resnext.dnn_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_mcdo_smoothing_101"]:
-        model = resnext.mcdo_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = resnext.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # Wide ResNet
     elif name in ["wideresnet_dnn_50"]:
-        model = wideresnet.dnn_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_50"]:
-        model = wideresnet.mcdo_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_dnn_smoothing_50"]:
-        model = wideresnet.dnn_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_smoothing_50"]:
-        model = wideresnet.mcdo_smooth_50(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_dnn_101"]:
-        model = wideresnet.dnn_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_101"]:
-        model = wideresnet.mcdo_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_dnn_smoothing_101"]:
-        model = wideresnet.dnn_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_smoothing_101"]:
-        model = wideresnet.mcdo_smooth_101(num_classes=num_classes, tiny=tiny, name=name, **block_kwargs)
+        model = wideresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     else:
         raise NotImplementedError
 
-    if verbose and tiny:
+    if verbose and stem:
         stats(model, torch.randn([3, 3, 32, 32]))
     elif verbose:
         stats(model, torch.randn([3, 3, 224, 224]))
