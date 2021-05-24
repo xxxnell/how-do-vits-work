@@ -62,7 +62,7 @@ def get_cifar100(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761), pa
 
 
 def get_imagenet(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
-                 root="./data"):
+                 root="./data", base_folder='imagenet'):
     transform_train = transforms.Compose([
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),
@@ -77,8 +77,8 @@ def get_imagenet(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
         transforms.Normalize(mean, std),
     ])
 
-    train_dir = os.path.join(root, 'train')
-    test_dir = os.path.join(root, 'val')
+    train_dir = os.path.join(root, base_folder, 'train')
+    test_dir = os.path.join(root, base_folder, 'val')
 
     dataset_train = datasets.ImageFolder(train_dir, transform_train)
     dataset_test = datasets.ImageFolder(test_dir, transform_test)
