@@ -84,7 +84,7 @@ In conclusion, **averaging feature map points tends to help neural network optim
 
 ## Evaluating Robustness on Corrupted Datasets
 
-Refer to ```robustness.ipynb``` for evaluation corruption robustness on CIFAR-10-C and CIFAR-100-C. It requires a trained model. Run all cells to get predictive performance of the model on datasets which consist of data currupted by 15 different types with 5 levels of intensity each. We provide [a sample robustness result](resources/results/cifar100_alexnet_dnn_corrupted.csv).
+Refer to ```robustness.ipynb``` for evaluation corruption robustness on CIFAR-10-C and CIFAR-100-C. It requires a trained model. Run all cells to get predictive performance of the model on datasets which consist of data currupted by 15 different types with 5 levels of intensity each. We provide [a sample robustness result](resources/results/imagenet_alexnet_dnn_corrupted.csv).
 
 
 <table cellspacing="15" style="width:100%;">
