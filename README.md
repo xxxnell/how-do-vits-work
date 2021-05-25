@@ -2,7 +2,7 @@
 
 # Blurs Make Results Clearer: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness
 
-This repository provides a PyTorch implimentation of "Blurs Make Results Clearer: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness". In this work, we show that a simple blur operation improves accuracy, uncertainty estimation, and corruption robustness simultaneously, since the blur ensembles spatial information. Espetically, MC dropout with the spatial smoothing achieves high predictive performance with only a small number of ensembles.
+This repository provides a PyTorch implimentation of "Blurs Make Results Clearer: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness". In this work, we show that a simple blur operation improves accuracy, uncertainty estimation, and corruption robustness simultaneously, since the blur ensembles spatial information. Espetically, MC dropout incorporating the spatial smoothing achieves high predictive performance merely with a handful of ensembles.
 
 <table cellspacing="15" style="width:100%;">
   <tr>
@@ -15,9 +15,9 @@ This repository provides a PyTorch implimentation of "Blurs Make Results Clearer
   </tr>
 </table>
 
-The figure above shows the predictive performance of ResNet-18 on CIFAR-100. In this figure, MC dropout reqiures an ensemble size of fifty to achieve high predictive performance. The predictive performance of "MC dropout + spatial smoothing" with ensemble size of two is comparable to that of the vanilla MC dropout with ensemble size of fifty. In addition, the spatial smoothing also improves deterministic NN. In the paper, we show that it consistently improves the predictive performance on ImageNet.
+The figure above shows the predictive performance of ResNet-18 on CIFAR-100. In this figure, MC dropout reqiures an ensemble size of fifty to achieve high predictive performance. The predictive performance of "MC dropout + spatial smoothing" with an ensemble size of two is comparable to that of the vanilla MC dropout with an ensemble size of fifty. In addition, the spatial smoothing also can be applied to canonical deterministic NNs to improve the performances. In the paper, we show that it consistently improves the predictive performance on ImageNet.
 
-We also discuss global average pooling (GAP), pre-activation, and ReLU6 as special cases of the spatial smoothing. Experiments show that they improve uncertainty as well as robustness.
+We also address global average pooling (GAP), pre-activation, and ReLU6 as special cases of the spatial smoothing. Experiments show that they improve not only accuracy but also uncertainty and robustness.
 
 
 ## Getting Started 
