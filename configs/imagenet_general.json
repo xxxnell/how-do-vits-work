@@ -15,7 +15,7 @@
         "n_ff": 1
     },
     "model": {
-        "stem": false,
+        "stem": true,
         "block": {}
     },
     "optim": {
