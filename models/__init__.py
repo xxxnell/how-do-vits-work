@@ -221,8 +221,22 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
 
 def save(model, dataset_name, uid, optimizer=None, root="models_checkpoints"):
     checkpoint_path = os.path.join(root, dataset_name, model.name)
+    fname = "%s_%s_%s.pth.tar" % (dataset_name, model.name, uid)
+    save_path = os.path.join(checkpoint_path, fname)
+
     Path(checkpoint_path).mkdir(parents=True, exist_ok=True)
-    save_path = os.path.join(checkpoint_path, "%s_%s_%s.pth.tar" % (dataset_name, model.name, uid))
+    _save(model, save_path, optimizer)
+
+
+def save_snapshot(model, dataset_name, uid, typ, optimizer=None, root="models_checkpoints"):
+    snapshot_path = os.path.join(root, dataset_name, model.name, "%s_%s_%s" % (dataset_name, model.name, uid))
+    fname = "%s_%s_%s_%%s.pth.tar" % (dataset_name, model.name, uid)
+    save_path = os.path.join(snapshot_path, fname)
+
+    Path(snapshot_path).mkdir(parents=True, exist_ok=True)
+    _save(model, save_path % typ, optimizer)
+
+def _save(model, save_path, optimizer=None):
     save_obj = {
         "name": model.name,
         "state_dict": model.state_dict() if type(model) is not nn.DataParallel else model.module.state_dict(),
@@ -232,9 +246,21 @@ def save(model, dataset_name, uid, optimizer=None, root="models_checkpoints"):
     torch.save(save_obj, save_path)
 
 
-def load(model, dataset_name, uid, root="models_checkpoints", optimizer=None):
+def load(model, dataset_name, uid, optimizer=None, root="models_checkpoints"):
     checkpoint_path = os.path.join(root, dataset_name, model.name)
     save_path = os.path.join(checkpoint_path, "%s_%s_%s.pth.tar" % (dataset_name, model.name, uid))
+    _load(model, save_path, optimizer)
+
+
+def load_snapshot(model, dataset_name, uid, typ, optimizer=None, root="models_checkpoints", ):
+    snapshot_path = os.path.join(root, dataset_name, model.name, "%s_%s_%s" % (dataset_name, model.name, uid))
+    fname = "%s_%s_%s_%%s.pth.tar" % (dataset_name, model.name, uid)
+    save_path = os.path.join(snapshot_path, fname)
+
+    _load(model, save_path % typ, optimizer)
+
+
+def _load(model, save_path, optimizer=None):
     checkpoint = torch.load(save_path)
     model.load_state_dict(checkpoint["state_dict"])
     if optimizer is not None:
