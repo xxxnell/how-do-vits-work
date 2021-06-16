@@ -12,6 +12,7 @@ import models.resnet as resnet
 import models.preresnet as preresnet
 import models.resnext as resnext
 import models.wideresnet as wideresnet
+import models.seresnet as seresnet
 
 import ops.meters as meters
 
@@ -208,6 +209,47 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = wideresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_smoothing_101"]:
         model = wideresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    # SE ResNet
+    elif name in ["seresnet_dnn_18"]:
+        model = seresnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_18"]:
+        model = seresnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_smoothing_18"]:
+        model = seresnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_smoothing_18"]:
+        model = seresnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_34"]:
+        model = seresnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_34"]:
+        model = seresnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_smoothing_34"]:
+        model = seresnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_smoothing_34"]:
+        model = seresnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_50"]:
+        model = seresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_50"]:
+        model = seresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_smoothing_50"]:
+        model = seresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_smoothing_50"]:
+        model = seresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_101"]:
+        model = seresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_101"]:
+        model = seresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_smoothing_101"]:
+        model = seresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_smoothing_101"]:
+        model = seresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_152"]:
+        model = seresnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_152"]:
+        model = seresnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_dnn_smoothing_152"]:
+        model = seresnet.dnn_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["seresnet_mcdo_smoothing_152"]:
+        model = seresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     else:
         raise NotImplementedError
 

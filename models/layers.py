@@ -27,8 +27,8 @@ def bn(channels):
     return nn.BatchNorm2d(channels)
 
 
-def dense(in_features, out_features):
-    return nn.Linear(in_features, out_features)
+def dense(in_features, out_features, bias=True):
+    return nn.Linear(in_features, out_features, bias)
 
 
 def blur(in_filters, sfilter=(1, 1), pad_mode="constant"):
@@ -101,3 +101,25 @@ class Downsample(nn.Module):
     def extra_repr(self):
         return "strides=%s" % repr(self.strides)
 
+
+class SEBlock(nn.Module):
+
+    def __init__(self, channel, reduction=16):
+        super().__init__()
+        self.gap = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc1 = dense(channel, channel // reduction, bias=False)
+        self.relu = relu()
+        self.fc2 = dense(channel // reduction, channel, bias=False)
+        self.prob = nn.Sigmoid()
+
+    def forward(self, x):
+        b, c, _, _ = x.size()
+        s = self.gap(x)
+        s = s.view(b, c)
+        s = self.fc1(s)
+        s = self.relu(s)
+        s = self.fc2(s)
+        s = self.prob(s)
+        s = s.view(b, c, 1, 1)
+
+        return x * s
