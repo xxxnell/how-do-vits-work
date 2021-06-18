@@ -14,6 +14,7 @@ import models.resnext as resnext
 import models.wideresnet as wideresnet
 import models.seresnet as seresnet
 import models.vit as vit
+import models.pit as pit
 
 import ops.meters as meters
 
@@ -261,6 +262,14 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = vit.large(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vit_h"]:
         model = vit.huge(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["pit_ti"]:
+        model = pit.tiny(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["pit_xs"]:
+        model = pit.xsmall(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["pit_s"]:
+        model = pit.small(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["pit_b"]:
+        model = pit.base(num_classes=num_classes, name=name, **block_kwargs)
     else:
         raise NotImplementedError
 
