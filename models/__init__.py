@@ -13,6 +13,7 @@ import models.preresnet as preresnet
 import models.resnext as resnext
 import models.wideresnet as wideresnet
 import models.seresnet as seresnet
+import models.vit as vit
 
 import ops.meters as meters
 
@@ -250,6 +251,16 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = seresnet.dnn_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_smoothing_152"]:
         model = seresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["vit_ti"]:
+        model = vit.tiny(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["vit_s"]:
+        model = vit.small(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["vit_b"]:
+        model = vit.base(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["vit_l"]:
+        model = vit.large(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["vit_h"]:
+        model = vit.huge(num_classes=num_classes, name=name, **block_kwargs)
     else:
         raise NotImplementedError
 
