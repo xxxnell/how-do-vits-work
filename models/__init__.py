@@ -212,9 +212,9 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         raise NotImplementedError
 
     if verbose and stem:
-        stats(model, torch.randn([3, 3, 32, 32]))
-    elif verbose:
         stats(model, torch.randn([3, 3, 224, 224]))
+    elif verbose:
+        stats(model, torch.randn([3, 3, 32, 32]))
 
     return model
 
