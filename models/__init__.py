@@ -287,7 +287,10 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     else:
         raise NotImplementedError
 
-    if verbose and stem:
+    if verbose and "image_size" in block_kwargs:
+        image_size = block_kwargs["image_size"]
+        stats(model, torch.randn([3, 3, image_size, image_size]))
+    elif verbose and stem:
         stats(model, torch.randn([3, 3, 224, 224]))
     elif verbose:
         stats(model, torch.randn([3, 3, 32, 32]))
