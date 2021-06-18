@@ -15,6 +15,7 @@ import models.wideresnet as wideresnet
 import models.seresnet as seresnet
 import models.vit as vit
 import models.pit as pit
+import models.mixer as mixer
 
 import ops.meters as meters
 
@@ -252,6 +253,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = seresnet.dnn_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_smoothing_152"]:
         model = seresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    # ViT
     elif name in ["vit_ti"]:
         model = vit.tiny(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vit_s"]:
@@ -262,6 +264,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = vit.large(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vit_h"]:
         model = vit.huge(num_classes=num_classes, name=name, **block_kwargs)
+    # PiT
     elif name in ["pit_ti"]:
         model = pit.tiny(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["pit_xs"]:
@@ -270,6 +273,17 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = pit.small(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["pit_b"]:
         model = pit.base(num_classes=num_classes, name=name, **block_kwargs)
+    # MLP Mixer
+    elif name in ["mixer_ti"]:
+        model = mixer.tiny(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["mixer_s"]:
+        model = mixer.small(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["mixer_b"]:
+        model = mixer.base(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["mixer_l"]:
+        model = mixer.large(num_classes=num_classes, name=name, **block_kwargs)
+    elif name in ["mixer_h"]:
+        model = mixer.huge(num_classes=num_classes, name=name, **block_kwargs)
     else:
         raise NotImplementedError
 
