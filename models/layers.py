@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from einops.layers.torch import Rearrange
+
 
 def conv1x1(in_channels, out_channels, stride=1, groups=1):
     return convnxn(in_channels, out_channels, kernel_size=1, stride=stride, groups=groups)
@@ -23,8 +25,20 @@ def relu():
     return nn.ReLU()
 
 
-def bn(channels):
-    return nn.BatchNorm2d(channels)
+def bn(dim):
+    return nn.BatchNorm2d(dim)
+
+
+def bn1d(dim):
+    return nn.Sequential(
+        Rearrange('b h d ->  b d h'),
+        nn.BatchNorm1d(dim),
+        Rearrange('b d h ->  b h d'),
+    )
+
+
+def ln(dim):
+    return nn.LayerNorm(dim)
 
 
 def dense(in_features, out_features, bias=True):
