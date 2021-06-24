@@ -21,12 +21,22 @@ def get_optimizer(model, name, **kwargs):
         optimizer = optim.SGD(model.parameters(), **kwargs)
     elif name in ["Adam", "adam"]:
         optimizer = optim.Adam(model.parameters(), **kwargs)
+    elif name in ["AdamW", "adamw"]:
+        optimizer = optim.AdamW(model.parameters(), **kwargs)
+    elif name in ["RMSprop", "rmsprop"]:
+        optimizer = optim.RMSprop(model.parameters(), **kwargs)
     else:
         raise NotImplementedError
 
     sch_name = sch_kwargs.pop("name")
-    if sch_name in ["MultiStepLR"]:
+    if sch_name in ["StepLR"]:
+        train_scheduler = optim.lr_scheduler.StepLR(optimizer, **sch_kwargs)
+    elif sch_name in ["MultiStepLR"]:
         train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, **sch_kwargs)
+    elif sch_name in ["CosineAnnealingLR"]:
+        train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **sch_kwargs)
+    elif sch_name in ["CosineAnnealingWarmRestarts"]:
+        train_scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, **sch_kwargs)
     else:
         raise NotImplementedError
 
