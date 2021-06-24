@@ -1,5 +1,7 @@
+import os
 import time
 import copy
+from pathlib import Path
 
 import torch
 import torch.nn as nn
@@ -10,6 +12,8 @@ import ops.tests as tests
 import ops.meters as meters
 import ops.norm as norm
 
+import models
+
 
 def get_optimizer(model, name, **kwargs):
     sch_kwargs = copy.deepcopy(kwargs.pop("scheduler", {}))
@@ -17,12 +21,22 @@ def get_optimizer(model, name, **kwargs):
         optimizer = optim.SGD(model.parameters(), **kwargs)
     elif name in ["Adam", "adam"]:
         optimizer = optim.Adam(model.parameters(), **kwargs)
+    elif name in ["AdamW", "adamw"]:
+        optimizer = optim.AdamW(model.parameters(), **kwargs)
+    elif name in ["RMSprop", "rmsprop"]:
+        optimizer = optim.RMSprop(model.parameters(), **kwargs)
     else:
         raise NotImplementedError
 
     sch_name = sch_kwargs.pop("name")
-    if sch_name in ["MultiStepLR"]:
+    if sch_name in ["StepLR"]:
+        train_scheduler = optim.lr_scheduler.StepLR(optimizer, **sch_kwargs)
+    elif sch_name in ["MultiStepLR"]:
         train_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, **sch_kwargs)
+    elif sch_name in ["CosineAnnealingLR"]:
+        train_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **sch_kwargs)
+    elif sch_name in ["CosineAnnealingWarmRestarts"]:
+        train_scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, **sch_kwargs)
     else:
         raise NotImplementedError
 
@@ -34,13 +48,17 @@ def train(model, optimizer,
           train_scheduler, warmup_scheduler,
           train_args, val_args, gpu,
           writer=None,
+          snapshot=-1, root="models_checkpoints", dataset_name=None, uid=None,
           verbose=1):
     train_args = copy.deepcopy(train_args)
     val_args = copy.deepcopy(val_args)
+    snapshot_cond = snapshot > 0 and dataset_name is not None and uid is not None
 
     epochs = train_args.pop("epochs")
     warmup_epochs = train_args.get("warmup_epochs", 0)
     n_ff = val_args.pop("n_ff", 1)
+
+    models.save_snapshot(model, dataset_name, uid, "init", optimizer, root=root) if snapshot_cond else None
 
     model = model.cuda() if gpu else model.cpu()
     warmup_time = time.time()
@@ -48,11 +66,11 @@ def train(model, optimizer,
         *train_metrics, = train_epoch(optimizer, model, dataset_train, warmup_scheduler, gpu=gpu)
     if warmup_epochs > 0:
         print("The model is warmed up: %.2f sec" % (time.time() - warmup_time))
+        models.save_snapshot(model, dataset_name, uid, "warmup", optimizer, root=root) if snapshot_cond else None
 
     for epoch in range(epochs):
         batch_time = time.time()
-        *train_metrics, = train_epoch(optimizer, model, dataset_train,
-                                             gpu=gpu)
+        *train_metrics, = train_epoch(optimizer, model, dataset_train, gpu=gpu)
         train_scheduler.step()
         batch_time = time.time() - batch_time
 
@@ -75,6 +93,8 @@ def train(model, optimizer,
                 for name, param in model.named_parameters():
                     name = name.split(".")
                     writer.add_histogram("%s/%s" % (name[0], ".".join(name[1:])), param, global_step=epoch)
+        if snapshot_cond and (epoch + 1) % snapshot == 0:
+            models.save_snapshot(model, dataset_name, uid, epoch, optimizer, root=root) if snapshot_cond else None
 
 
 def train_epoch(optimizer, model, dataset,
