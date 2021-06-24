@@ -47,7 +47,7 @@ def get_loss_landscape(model, n_ff, dataset,
     model = model.cuda() if gpu else model.cpu()
     model = copy.deepcopy(model)
     ws0 = copy.deepcopy(model.state_dict())
-    bases = create_bases(model, gpu) if bases is not None else bases
+    bases = create_bases(model, gpu) if bases is None else bases
     xs = np.linspace(x_min, x_max, n_x)
     ys = np.linspace(y_min, y_max, n_y)
     ratio_grid = np.stack(np.meshgrid(xs, ys), axis=0).transpose((1, 2, 0))
