@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
-import models.layers as layers
 
+import models.layers as layers
+import models.gates as gates
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -27,7 +28,7 @@ class BasicBlock(nn.Module):
         self.bn2 = layers.bn(channels * self.expansion)
         self.relu2 = layers.relu()
 
-        self.se = layers.SEBlock(channels * self.expansion, reduction)
+        self.gate = gates.ChannelGate(channels * self.expansion, reduction, max_pool=False)
 
     def forward(self, x):
         skip = self.shortcut(x)
@@ -37,7 +38,7 @@ class BasicBlock(nn.Module):
         x = self.relu1(x)
         x = self.conv2(x)
         x = self.bn2(x)
-        x = self.se(x)
+        x = self.gate(x)
 
         x = skip + x
         x = self.relu2(x)
@@ -71,7 +72,7 @@ class Bottleneck(nn.Module):
         self.bn3 = layers.bn(channels * self.expansion)
         self.relu3 = layers.relu()
 
-        self.se = layers.SEBlock(channels * self.expansion, reduction)
+        self.gate = gates.ChannelGate(channels * self.expansion, reduction, max_pool=False)
 
     def forward(self, x):
         skip = self.shortcut(x)
@@ -84,7 +85,7 @@ class Bottleneck(nn.Module):
         x = self.relu2(x)
         x = self.conv3(x)
         x = self.bn3(x)
-        x = self.se(x)
+        x = self.gate(x)
 
         x = skip + x
         x = self.relu3(x)

@@ -34,7 +34,10 @@ class BasicBlock(nn.Module):
         self.bn2 = layers.bn(channels * self.expansion)
         self.relu2 = layers.relu()
 
-        self.gate = gates.ChannelGate(channels * self.expansion, reduction, max_pool=False)
+        self.gate = nn.Sequential(
+            gates.ChannelGate(channels * self.expansion, reduction, max_pool=True),
+            gates.SpatialGate(kernel_size=7, max_pool=True)
+        )
 
     def forward(self, x):
         skip = self.shortcut(x)
@@ -84,7 +87,11 @@ class Bottleneck(nn.Module):
         self.bn3 = layers.bn(channels * self.expansion)
         self.relu3 = layers.relu()
 
-        self.gate = gates.ChannelGate(channels * self.expansion, reduction, max_pool=False)
+        self.gate = nn.Sequential(
+            gates.ChannelGate(channels * self.expansion, reduction, max_pool=True),
+            gates.SpatialGate(kernel_size=7, max_pool=True)
+        )
+
 
     def forward(self, x):
         skip = self.shortcut(x)

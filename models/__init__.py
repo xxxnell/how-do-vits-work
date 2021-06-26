@@ -13,6 +13,7 @@ import models.preresnet as preresnet
 import models.resnext as resnext
 import models.wideresnet as wideresnet
 import models.seresnet as seresnet
+import models.cbamresnet as cbamresnet
 import models.vit as vit
 import models.pit as pit
 import models.mixer as mixer
@@ -253,6 +254,47 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = seresnet.dnn_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_smoothing_152"]:
         model = seresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    # CBAM ResNet
+    elif name in ["cbamresnet_dnn_18"]:
+        model = cbamresnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_18"]:
+        model = cbamresnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_smoothing_18"]:
+        model = cbamresnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_smoothing_18"]:
+        model = cbamresnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_34"]:
+        model = cbamresnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_34"]:
+        model = cbamresnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_smoothing_34"]:
+        model = cbamresnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_smoothing_34"]:
+        model = cbamresnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_50"]:
+        model = cbamresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_50"]:
+        model = cbamresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_smoothing_50"]:
+        model = cbamresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_smoothing_50"]:
+        model = cbamresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_101"]:
+        model = cbamresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_101"]:
+        model = cbamresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_smoothing_101"]:
+        model = cbamresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_smoothing_101"]:
+        model = cbamresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_152"]:
+        model = cbamresnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_152"]:
+        model = cbamresnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_dnn_smoothing_152"]:
+        model = cbamresnet.dnn_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
+    elif name in ["cbamresnet_mcdo_smoothing_152"]:
+        model = cbamresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # ViT
     elif name in ["vit_ti"]:
         model = vit.tiny(num_classes=num_classes, name=name, **block_kwargs)

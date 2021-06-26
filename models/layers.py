@@ -1,3 +1,4 @@
+import types
 import math
 import random
 
@@ -116,24 +117,13 @@ class Downsample(nn.Module):
         return "strides=%s" % repr(self.strides)
 
 
-class SEBlock(nn.Module):
+class Lambda(nn.Module):
 
-    def __init__(self, channel, reduction=16):
+    def __init__(self, lmd):
         super().__init__()
-        self.gap = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc1 = dense(channel, channel // reduction, bias=False)
-        self.relu = relu()
-        self.fc2 = dense(channel // reduction, channel, bias=False)
-        self.prob = nn.Sigmoid()
+        if not isinstance(lmd, types.LambdaType):
+            raise Exception("`lmd` should be lambda ftn.")
+        self.lmd = lmd
 
     def forward(self, x):
-        b, c, _, _ = x.size()
-        s = self.gap(x)
-        s = s.view(b, c)
-        s = self.fc1(s)
-        s = self.relu(s)
-        s = self.fc2(s)
-        s = self.prob(s)
-        s = s.view(b, c, 1, 1)
-
-        return x * s
+        return self.lmd(x)
