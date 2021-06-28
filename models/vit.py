@@ -4,8 +4,12 @@ This model is based on the implementation of https://github.com/lucidrains/vit-p
 import torch
 from torch import nn
 
+from einops.layers.torch import Reduce
+
+from models.layers import Lambda
 from models.embeddings import PatchEmbedding, CLSToken, AbsPosEmbedding
-from models.attentions import Transformer
+from models.attentions import Attention, MiniAttention, Transformer, MiniTransformer
+from models.gates import SpatialGate
 
 
 class ViT(nn.Module):
@@ -13,31 +17,32 @@ class ViT(nn.Module):
     def __init__(self, *,
                  image_size, patch_size, num_classes, depth, dim, heads, mlp_dim,
                  channel=3, head_dim=64, dropout=0.0, emb_dropout=0.0,
-                 name="vit"):
+                 embedding=None, classifier=None,
+                 name="vit", **block_kwargs):
         super().__init__()
         self.name = name
 
         self.embedding = nn.Sequential(
             PatchEmbedding(image_size, patch_size, dim, channel=channel),
             CLSToken(dim),
-            AbsPosEmbedding(image_size, patch_size, dim),
+            AbsPosEmbedding(image_size, patch_size, dim, cls=True),
             nn.Dropout(emb_dropout)
-        )
+        ) if embedding is None else embedding
 
-        self.transformers = [Transformer(dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim, dropout=dropout)
+        self.transformers = [Transformer(dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim, dropout=dropout, attn=Attention)
                              for _ in range(depth)]
         self.transformers = nn.Sequential(*self.transformers)
 
-        self.mlp_head = nn.Sequential(
+        self.classifier = nn.Sequential(
+            Lambda(lambda x: x[:, 0]),
             nn.LayerNorm(dim),
             nn.Linear(dim, num_classes)
-        )
+        ) if classifier is None else classifier
 
     def forward(self, x):
         x = self.embedding(x)
         x = self.transformers(x)
-        x = x[:, 0]
-        x = self.mlp_head(x)
+        x = self.classifier(x)
 
         return x
 
@@ -51,7 +56,7 @@ def tiny(num_classes=1000, name="vit_ti",
         num_classes=num_classes, depth=depth,
         dim=dim, heads=heads, head_dim=head_dim,
         mlp_dim=mlp_dim, dropout=dropout, emb_dropout=emb_dropout,
-        name=name,
+        name=name, **block_kwargs,
     )
 
 
@@ -64,7 +69,7 @@ def small(num_classes=1000, name="vit_s",
         num_classes=num_classes, depth=depth,
         dim=dim, heads=heads, head_dim=head_dim,
         mlp_dim=mlp_dim, dropout=dropout, emb_dropout=emb_dropout,
-        name=name,
+        name=name, **block_kwargs,
     )
 
 
@@ -77,7 +82,7 @@ def base(num_classes=1000, name="vit_b",
         num_classes=num_classes, depth=depth,
         dim=dim, heads=heads, head_dim=head_dim,
         mlp_dim=mlp_dim, dropout=dropout, emb_dropout=emb_dropout,
-        name=name,
+        name=name, **block_kwargs,
     )
 
 
@@ -90,7 +95,7 @@ def large(num_classes=1000, name="vit_l",
         num_classes=num_classes, depth=depth,
         dim=dim, heads=heads, head_dim=head_dim,
         mlp_dim=mlp_dim, dropout=dropout, emb_dropout=emb_dropout,
-        name=name,
+        name=name, **block_kwargs,
     )
 
 
@@ -103,5 +108,5 @@ def huge(num_classes=1000, name="vit_h",
         num_classes=num_classes, depth=depth,
         dim=dim, heads=heads, head_dim=head_dim,
         mlp_dim=mlp_dim, dropout=dropout, emb_dropout=emb_dropout,
-        name=name,
+        name=name, **block_kwargs,
     )

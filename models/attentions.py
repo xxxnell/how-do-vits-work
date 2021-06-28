@@ -1,5 +1,13 @@
-from einops import rearrange
+"""
+These modules are based on the implementation of https://github.com/lucidrains/vit-pytorch.
+"""
+import numpy as np
+
+import torch
 from torch import nn, einsum
+
+from einops import rearrange
+from models.layers import bn1d
 
 
 class FeedForward(nn.Module):
@@ -29,7 +37,6 @@ class Attention(nn.Module):
                  heads=8, head_dim=64, dropout=0.0):
         super().__init__()
         inner_dim = head_dim * heads
-        project_out = not (heads == 1 and head_dim == dim)
         dim_out = dim_in if dim_out is None else dim_out
 
         self.heads = heads
@@ -40,7 +47,7 @@ class Attention(nn.Module):
         self.to_out = nn.Sequential(
             nn.Linear(inner_dim, dim_out),
             nn.Dropout(dropout)
-        ) if project_out else nn.Identity()
+        )
 
     def forward(self, x):
         b, n, _ = x.shape

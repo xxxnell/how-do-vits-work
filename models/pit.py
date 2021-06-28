@@ -8,6 +8,7 @@ from torch import nn
 
 from einops import rearrange
 
+from models.layers import Lambda
 from models.embeddings import ConvEmbedding, CLSToken, AbsPosEmbedding
 from models.attentions import Transformer
 
@@ -52,6 +53,7 @@ class PiT(nn.Module):
     def __init__(self, *,
                  image_size, patch_size, num_classes, dims, depths, heads, head_dims, mlp_dims,
                  channel=3, dropout=0.0, emb_dropout=0.0, stride=None,
+                 embedding=None, classifier=None,
                  name="pit"):
         super().__init__()
         self.name = name
@@ -72,7 +74,7 @@ class PiT(nn.Module):
             CLSToken(dims[0]),
             AbsPosEmbedding(image_size, patch_size, dims[0], stride=stride),
             nn.Dropout(emb_dropout)
-        )
+        ) if embedding is None else embedding
 
         self.transformers = []
         for i in range(len(depths)):
@@ -85,16 +87,16 @@ class PiT(nn.Module):
                 )
         self.transformers = nn.Sequential(*self.transformers)
 
-        self.mlp_head = nn.Sequential(
+        self.classifier = nn.Sequential(
+            Lambda(lambda x: x[:, 0]),
             nn.LayerNorm(dims[-1]),
             nn.Linear(dims[-1], num_classes)
-        )
+        ) if classifier is None else classifier
 
     def forward(self, x):
         x = self.embedding(x)
         x = self.transformers(x)
-        x = x[:, 0]
-        x = self.mlp_head(x)
+        x = self.classifier(x)
 
         return x
 
@@ -113,7 +115,7 @@ def tiny(num_classes=1000, name="pit_ti",
         num_classes=num_classes, depths=depths,
         dims=dims, heads=heads, head_dims=head_dims,
         mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout,
-        name=name
+        name=name, **block_kwargs
     )
 
 
@@ -127,7 +129,7 @@ def xsmall(num_classes=1000, name="pit_xs",
         num_classes=num_classes, depths=depths,
         dims=dims, heads=heads, head_dims=head_dims,
         mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout,
-        name=name
+        name=name, **block_kwargs
     )
 
 
@@ -141,7 +143,7 @@ def small(num_classes=1000, name="pit_s",
         num_classes=num_classes, depths=depths,
         dims=dims, heads=heads, head_dims=head_dims,
         mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout,
-        name=name
+        name=name, **block_kwargs
     )
 
 
@@ -155,5 +157,5 @@ def base(num_classes=1000, name="pit_base",
         num_classes=num_classes, depths=depths,
         dims=dims, heads=heads, head_dims=head_dims,
         mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout,
-        name=name
+        name=name, **block_kwargs
     )
