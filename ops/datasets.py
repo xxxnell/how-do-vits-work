@@ -6,6 +6,8 @@ import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
+import timm.data.transforms_factory as tff
+
 import ops.cifarc as cifarc
 import ops.cifarp as cifarp
 import ops.imagenetc as imagenetc
@@ -23,18 +25,28 @@ def get_dataset(name, root="./data", download=False, **kwargs):
     return dataset_train, dataset_test
 
 
-def get_cifar10(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010), padding=(4, 4),
+def get_cifar10(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010),
+                scale=None, ratio=None,
+                hflip=0.5, vflip=0.0,
+                color_jitter=0.0,
+                auto_augment=None,
+                interpolation='random',
+                re_prob=0.0, re_mode='const', re_count=1, re_num_splits=0,
                 root="./data", download=False):
-    transform_train = transforms.Compose([
-        transforms.RandomCrop(32, padding=tuple(padding)),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
-    transform_test = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std)
-    ])
+    transform_train = tff.transforms_imagenet_train(
+        img_size=32, mean=mean, std=std,
+        scale=scale, ratio=ratio,
+        hflip=hflip, vflip=vflip,
+        color_jitter=color_jitter,
+        auto_augment=auto_augment,
+        interpolation=interpolation,
+        re_prob=re_prob, re_mode=re_mode, re_count=re_count, re_num_splits=re_num_splits,
+    )
+
+    transform_test = tff.transforms_imagenet_eval(
+        img_size=32, mean=mean, std=std,
+        crop_pct=1.0, interpolation='bilinear',
+    )
 
     dataset_train = torchvision.datasets.CIFAR10(root=root, train=True, download=download, transform=transform_train)
     dataset_test = torchvision.datasets.CIFAR10(root=root, train=False, download=download, transform=transform_test)
@@ -42,18 +54,39 @@ def get_cifar10(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010), pad
     return dataset_train, dataset_test
 
 
-def get_cifar100(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761), padding=(4, 4),
+def get_cifar100(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761),
+                 padding=None,
+                 scale=None, ratio=None,
+                 hflip=0.5, vflip=0.0,
+                 color_jitter=0.0,
+                 auto_augment=None,
+                 interpolation='random',
+                 re_prob=0.0, re_mode='const', re_count=1, re_num_splits=0,
                  root="./data", download=False):
-    transform_train = transforms.Compose([
-        transforms.RandomCrop(32, padding=tuple(padding)),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
-    transform_test = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std)
-    ])
+    transform_trains = tff.transforms_imagenet_train(
+        img_size=32, mean=mean, std=std,
+        scale=scale, ratio=ratio,
+        hflip=hflip, vflip=vflip,
+        color_jitter=color_jitter,
+        auto_augment=auto_augment,
+        interpolation=interpolation,
+        re_prob=re_prob, re_mode=re_mode, re_count=re_count, re_num_splits=re_num_splits,
+        separate=True
+    )
+
+    if padding is not None:
+        padding = tuple(padding) if isinstance(padding, list) else padding
+        tfl = [transforms.RandomCrop(32, padding=padding)]
+        tfl.append(transforms.RandomHorizontalFlip(p=hflip)) if hflip > 0 else None
+        tfl.append(transforms.RandomVerticalFlip(p=vflip)) if vflip > 0 else None
+        transform_trains = (transforms.Compose(tfl), *transform_trains[1:])
+
+    transform_train = transforms.Compose(transform_trains)
+
+    transform_test = tff.transforms_imagenet_eval(
+        img_size=32, mean=mean, std=std,
+        crop_pct=1.0, interpolation='bilinear',
+    )
 
     dataset_train = torchvision.datasets.CIFAR100(root=root, train=True, download=download, transform=transform_train)
     dataset_test = torchvision.datasets.CIFAR100(root=root, train=False, download=download, transform=transform_test)
@@ -62,20 +95,26 @@ def get_cifar100(mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761), pa
 
 
 def get_imagenet(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                 scale=None, ratio=None,
+                 hflip=0.5, vflip=0.0,
+                 color_jitter=0.0,
+                 auto_augment=None,
+                 interpolation='random',
+                 re_prob=0.0, re_mode='const', re_count=1, re_num_splits=0,
                  root="./data", base_folder='imagenet'):
-    transform_train = transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
+    transform_train = tff.transforms_imagenet_train(
+        img_size=224, mean=mean, std=std,
+        scale=scale, ratio=ratio,
+        hflip=hflip, vflip=vflip,
+        color_jitter=color_jitter,
+        auto_augment=auto_augment,
+        interpolation=interpolation,
+        re_prob=re_prob, re_mode=re_mode, re_count=re_count, re_num_splits=re_num_splits,
+    )
 
-    transform_test = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean, std),
-    ])
+    transform_test = tff.transforms_imagenet_eval(
+        img_size=224, mean=mean, std=std,
+    )
 
     train_dir = os.path.join(root, base_folder, 'train')
     test_dir = os.path.join(root, base_folder, 'val')

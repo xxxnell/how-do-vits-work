@@ -3,10 +3,16 @@ import time
 import copy
 from pathlib import Path
 
+import numpy as np
+
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
+
+from timm.loss import SoftTargetCrossEntropy, LabelSmoothingCrossEntropy
+from timm.data import Mixup
 
 import ops.tests as tests
 import ops.meters as meters
@@ -56,21 +62,35 @@ def train(model, optimizer,
 
     epochs = train_args.pop("epochs")
     warmup_epochs = train_args.get("warmup_epochs", 0)
+    smoothing = train_args.get("smoothing", 0.0)
+    mixup_args = train_args.get("mixup", None)
+    max_norm = train_args.get("max_norm", None)
     n_ff = val_args.pop("n_ff", 1)
+
+    mixup_function = Mixup(
+        **mixup_args,
+        label_smoothing=smoothing,
+    ) if mixup_args is not None else None
 
     models.save_snapshot(model, dataset_name, uid, "init", optimizer, root=root) if snapshot_cond else None
 
     model = model.cuda() if gpu else model.cpu()
     warmup_time = time.time()
     for epoch in range(warmup_epochs):
-        *train_metrics, = train_epoch(optimizer, model, dataset_train, warmup_scheduler, gpu=gpu)
+        *train_metrics, = train_epoch(optimizer, model, dataset_train,
+                                      smoothing=smoothing, mixup_function=mixup_function,
+                                      max_norm=max_norm,
+                                      scheduler=warmup_scheduler, gpu=gpu)
     if warmup_epochs > 0:
         print("The model is warmed up: %.2f sec" % (time.time() - warmup_time))
         models.save_snapshot(model, dataset_name, uid, "warmup", optimizer, root=root) if snapshot_cond else None
 
     for epoch in range(epochs):
         batch_time = time.time()
-        *train_metrics, = train_epoch(optimizer, model, dataset_train, gpu=gpu)
+        *train_metrics, = train_epoch(optimizer, model, dataset_train,
+                                      smoothing=smoothing, mixup_function=mixup_function,
+                                      max_norm=max_norm,
+                                      gpu=gpu)
         train_scheduler.step()
         batch_time = time.time() - batch_time
 
@@ -98,10 +118,15 @@ def train(model, optimizer,
 
 
 def train_epoch(optimizer, model, dataset,
-                scheduler=None, gpu=True):
+                smoothing=0.0, mixup_function=None, max_norm=None, scheduler=None, gpu=True):
     model.train()
-    nll_function = nn.CrossEntropyLoss()
-    nll_function = nll_function.cuda() if gpu else nll_function
+    if mixup_function is not None:
+        loss_function = SoftTargetCrossEntropy()
+    elif smoothing > 0.0:
+        loss_function = LabelSmoothingCrossEntropy(smoothing=smoothing)
+    else:
+        loss_function = nn.CrossEntropyLoss()
+    loss_function = loss_function.cuda() if gpu else loss_function
 
     loss_meter = meters.AverageMeter("loss")
     nll_meter = meters.AverageMeter("nll")
@@ -113,13 +138,19 @@ def train_epoch(optimizer, model, dataset,
             xs = xs.cuda()
             ys = ys.cuda()
 
+        if mixup_function is not None:
+            xs, ys = mixup_function(xs, ys)
+
         optimizer.zero_grad()
         logits = model(xs)
-        loss = nll_function(logits, ys)
-        nll_meter.update(loss.item())
+        loss = loss_function(logits, ys)
 
+        nll_meter.update(loss.item())
         loss_meter.update(loss.item())
+
         loss.backward()
+        if max_norm is not None:
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm)
         optimizer.step()
 
         if scheduler:
