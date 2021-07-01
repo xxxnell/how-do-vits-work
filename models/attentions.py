@@ -7,7 +7,7 @@ import torch
 from torch import nn, einsum
 
 from einops import rearrange
-from models.layers import bn1d
+from models.layers import bn1d, StochasticDepth
 
 
 class FeedForward(nn.Module):
@@ -21,9 +21,9 @@ class FeedForward(nn.Module):
         self.net = nn.Sequential(
             f(dim_in, hidden_dim),
             g(),
-            nn.Dropout(dropout),
+            nn.Dropout(dropout) if dropout > 0.0 else nn.Identity(),
             f(hidden_dim, dim_out),
-            nn.Dropout(dropout)
+            nn.Dropout(dropout) if dropout > 0.0 else nn.Identity(),
         )
 
     def forward(self, x):
@@ -46,7 +46,7 @@ class Attention(nn.Module):
 
         self.to_out = nn.Sequential(
             nn.Linear(inner_dim, dim_out),
-            nn.Dropout(dropout)
+            nn.Dropout(dropout) if dropout > 0.0 else nn.Identity()
         )
 
     def forward(self, x):
@@ -68,7 +68,8 @@ class Attention(nn.Module):
 class Transformer(nn.Module):
 
     def __init__(self, dim_in, dim_out=None, *,
-                 heads=8, head_dim=64, mlp_dim=1024, dropout=0.0, norm=nn.LayerNorm):
+                 heads=8, head_dim=64, mlp_dim=1024, dropout=0.0, sd=0.0,
+                 attn=Attention, norm=nn.LayerNorm):
         super().__init__()
         dim_out = dim_in if dim_out is None else dim_out
 
@@ -79,20 +80,27 @@ class Transformer(nn.Module):
         self.shortcut = nn.Sequential(*self.shortcut)
 
         self.norm1 = norm(dim_in)
-        self.mhsa = Attention(dim_in, dim_out, heads=heads, head_dim=head_dim, dropout=dropout)
+        self.mhsa = attn(dim_in, dim_out, heads=heads, head_dim=head_dim, dropout=dropout)
+        self.sd = StochasticDepth(sd)
 
         self.norm2 = norm(dim_out)
         self.ff = FeedForward(dim_out, mlp_dim, dim_out, dropout=dropout)
+        self.sd = StochasticDepth(sd)
 
     def forward(self, x):
         skip = self.shortcut(x)
         x = self.norm1(x)
         x, attn = self.mhsa(x)
-        x = x + skip
+        # x = x + skip
+        x = self.sd(x, skip)
 
         skip = x
         x = self.norm2(x)
         x = self.ff(x)
+        # x = x + skip
+        x = self.sd(x, skip)
+
+        return x
         x = x + skip
 
         return x

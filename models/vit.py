@@ -13,7 +13,7 @@ class ViT(nn.Module):
 
     def __init__(self, *,
                  image_size, patch_size, num_classes, depth, dim, heads, mlp_dim,
-                 channel=3, head_dim=64, dropout=0.0, emb_dropout=0.0,
+                 channel=3, head_dim=64, dropout=0.0, emb_dropout=0.0, sd=0.0,
                  embedding=None, classifier=None,
                  name="vit", **block_kwargs):
         super().__init__()
@@ -26,8 +26,12 @@ class ViT(nn.Module):
             nn.Dropout(emb_dropout) if emb_dropout > 0.0 else nn.Identity()
         ) if embedding is None else embedding
 
-        self.transformers = [Transformer(dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim, dropout=dropout)
-                             for _ in range(depth)]
+        self.transformers = []
+        for i in range(depth):
+            self.transformers.append(
+                Transformer(dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim,
+                            dropout=dropout, sd=(sd * i / (depth - 1)))
+            )
         self.transformers = nn.Sequential(*self.transformers)
 
         self.classifier = nn.Sequential(

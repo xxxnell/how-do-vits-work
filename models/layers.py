@@ -2,6 +2,8 @@ import types
 import math
 import random
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -115,6 +117,27 @@ class Downsample(nn.Module):
 
     def extra_repr(self):
         return "strides=%s" % repr(self.strides)
+
+
+class StochasticDepth(nn.Module):
+
+    def __init__(self, p, **kwargs):
+        super().__init__()
+
+        self.p = p
+
+    def forward(self, x1, x2):
+        if self.training:
+            b = np.random.uniform() > self.p
+            b = float(b)
+            x = b * x1 + x2
+        else:
+            x = (1 - self.p) * x1 + x2
+
+        return x
+
+    def extra_repr(self):
+        return "p=%s" % repr(self.p)
 
 
 class Lambda(nn.Module):
