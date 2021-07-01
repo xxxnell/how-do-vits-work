@@ -4,12 +4,9 @@ This model is based on the implementation of https://github.com/lucidrains/vit-p
 import torch
 from torch import nn
 
-from einops.layers.torch import Reduce
-
 from models.layers import Lambda
 from models.embeddings import PatchEmbedding, CLSToken, AbsPosEmbedding
-from models.attentions import Attention, MiniAttention, Transformer, MiniTransformer
-from models.gates import SpatialGate
+from models.attentions import Transformer
 
 
 class ViT(nn.Module):
@@ -26,10 +23,10 @@ class ViT(nn.Module):
             PatchEmbedding(image_size, patch_size, dim, channel=channel),
             CLSToken(dim),
             AbsPosEmbedding(image_size, patch_size, dim, cls=True),
-            nn.Dropout(emb_dropout)
+            nn.Dropout(emb_dropout) if emb_dropout > 0.0 else nn.Identity()
         ) if embedding is None else embedding
 
-        self.transformers = [Transformer(dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim, dropout=dropout, attn=Attention)
+        self.transformers = [Transformer(dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim, dropout=dropout)
                              for _ in range(depth)]
         self.transformers = nn.Sequential(*self.transformers)
 
@@ -107,6 +104,6 @@ def huge(num_classes=1000, name="vit_h",
         image_size=image_size, patch_size=patch_size, channel=channel,
         num_classes=num_classes, depth=depth,
         dim=dim, heads=heads, head_dim=head_dim,
-        mlp_dim=mlp_dim, dropout=dropout, emb_dropout=emb_dropout,
+        mlp_dim=mlp_dim, dropout=dropout, emb_dropout=emb_dropout, 
         name=name, **block_kwargs,
     )

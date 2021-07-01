@@ -73,7 +73,7 @@ class PiT(nn.Module):
             ConvEmbedding(patch_size, dims[0], channel=channel, stride=stride),
             CLSToken(dims[0]),
             AbsPosEmbedding(image_size, patch_size, dims[0], stride=stride),
-            nn.Dropout(emb_dropout)
+            nn.Dropout(emb_dropout) if emb_dropout > 0.0 else nn.Identity()
         ) if embedding is None else embedding
 
         self.transformers = []
