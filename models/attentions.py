@@ -7,7 +7,7 @@ import torch
 from torch import nn, einsum
 
 from einops import rearrange
-from models.layers import bn1d, StochasticDepth
+from models.layers import bn1d, DropPath
 
 
 class FeedForward(nn.Module):
@@ -49,13 +49,13 @@ class Attention(nn.Module):
             nn.Dropout(dropout) if dropout > 0.0 else nn.Identity()
         )
 
-    def forward(self, x):
+    def forward(self, x, mask=None):
         b, n, _ = x.shape
         qkv = self.to_qkv(x).chunk(3, dim=-1)
         q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h=self.heads), qkv)
 
         dots = einsum('b h i d, b h j d -> b h i j', q, k) * self.scale
-
+        dots = dots + mask if mask is not None else dots
         attn = dots.softmax(dim=-1)
 
         out = einsum('b h i j, b h j d -> b h i d', attn, v)
@@ -69,7 +69,8 @@ class Transformer(nn.Module):
 
     def __init__(self, dim_in, dim_out=None, *,
                  heads=8, head_dim=64, mlp_dim=1024, dropout=0.0, sd=0.0,
-                 attn=Attention, norm=nn.LayerNorm):
+                 attn=Attention, norm=nn.LayerNorm,
+                 f=nn.Linear, g=nn.GELU):
         super().__init__()
         dim_out = dim_in if dim_out is None else dim_out
 
@@ -80,25 +81,23 @@ class Transformer(nn.Module):
         self.shortcut = nn.Sequential(*self.shortcut)
 
         self.norm1 = norm(dim_in)
-        self.mhsa = attn(dim_in, dim_out, heads=heads, head_dim=head_dim, dropout=dropout)
-        self.sd = StochasticDepth(sd)
+        self.attn = attn(dim_in, dim_out, heads=heads, head_dim=head_dim, dropout=dropout)
+        self.sd1 = DropPath(sd) if sd > 0.0 else nn.Identity()
 
         self.norm2 = norm(dim_out)
-        self.ff = FeedForward(dim_out, mlp_dim, dim_out, dropout=dropout)
-        self.sd = StochasticDepth(sd)
+        self.ff = FeedForward(dim_out, mlp_dim, dim_out, dropout=dropout, f=f, g=g)
+        self.sd2 = DropPath(sd) if sd > 0.0 else nn.Identity()
 
-    def forward(self, x):
+    def forward(self, x, mask=None):
         skip = self.shortcut(x)
         x = self.norm1(x)
-        x, attn = self.mhsa(x)
-        # x = x + skip
-        x = self.sd(x, skip)
+        x, attn = self.attn(x, mask=mask)
+        x = self.sd1(x) + skip
 
         skip = x
         x = self.norm2(x)
         x = self.ff(x)
-        # x = x + skip
-        x = self.sd(x, skip)
+        x = self.sd2(x) + skip
 
         return x
         x = x + skip

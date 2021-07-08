@@ -9,7 +9,7 @@ from einops.layers.torch import Reduce
 
 from models.embeddings import PatchEmbedding
 from models.attentions import FeedForward
-from models.layers import StochasticDepth
+from models.layers import DropPath
 
 
 class MixerBlock(nn.Module):
@@ -21,22 +21,22 @@ class MixerBlock(nn.Module):
 
         self.norm1 = nn.LayerNorm(hidden_dim)
         self.ff1 = FeedForward(num_patches, spatial_dim, f=f1, dropout=dropout)
-        self.sd1 = StochasticDepth(sd)
+        self.sd1 = DropPath(sd)
 
         self.norm2 = nn.LayerNorm(hidden_dim)
         self.ff2 = FeedForward(hidden_dim, channel_dim, f=f2, dropout=dropout)
-        self.sd2 = StochasticDepth(sd)
+        self.sd2 = DropPath(sd)
 
     def forward(self, x):
         skip = x
         x = self.norm1(x)
         x = self.ff1(x)
-        x = self.sd1(x, skip)
+        x = self.sd1(x) + skip
 
         skip = x
         x = self.norm2(x)
         x = self.ff2(x)
-        x = self.sd2(x, skip)
+        x = self.sd2(x) + skip
 
         return x
 

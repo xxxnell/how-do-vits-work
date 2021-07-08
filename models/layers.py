@@ -119,20 +119,20 @@ class Downsample(nn.Module):
         return "strides=%s" % repr(self.strides)
 
 
-class StochasticDepth(nn.Module):
+class DropPath(nn.Module):
 
     def __init__(self, p, **kwargs):
         super().__init__()
 
         self.p = p
 
-    def forward(self, x1, x2):
+    def forward(self, x):
         if self.training:
             b = np.random.uniform() > self.p
             b = float(b)
-            x = b * x1 + x2
+            x = b * x
         else:
-            x = (1 - self.p) * x1 + x2
+            x = (1 - self.p) * x
 
         return x
 
