@@ -40,8 +40,12 @@ def bn1d(dim):
     )
 
 
-def ln(dim):
+def ln1d(dim):
     return nn.LayerNorm(dim)
+
+
+def ln2d(dim):
+    return nn.InstanceNorm2d(dim, affine=True)
 
 
 def dense(in_features, out_features, bias=True):

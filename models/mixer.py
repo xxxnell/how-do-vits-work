@@ -46,6 +46,7 @@ class Mixer(nn.Module):
     def __init__(self, *,
                  image_size, patch_size, num_classes, hidden_dim, spatial_dim, channel_dim, depth,
                  channel=3, dropout=0.0, sd=0.0,
+                 embedding=None, classifier=None,
                  name="mixer"):
         super().__init__()
         self.name = name
@@ -53,7 +54,9 @@ class Mixer(nn.Module):
             raise Exception("Image must be divisible by patch size.")
         num_patches = (image_size // patch_size) ** 2
 
-        self.embedding = PatchEmbedding(image_size, patch_size, hidden_dim, channel=channel)
+        self.embedding = nn.Sequential(
+            PatchEmbedding(image_size, patch_size, hidden_dim, channel=channel)
+        ) if embedding is None else embedding
 
         self.mlps = []
         for i in range(depth):
@@ -67,7 +70,7 @@ class Mixer(nn.Module):
             nn.LayerNorm(hidden_dim),
             Reduce('b n c -> b c', 'mean'),
             nn.Linear(hidden_dim, num_classes),
-        )
+        ) if classifier is None else classifier
 
     def forward(self, x):
         x = self.embedding(x)
@@ -95,7 +98,7 @@ def small(num_classes=1000, name="mixer_s",
           image_size=224, patch_size=16,
           depth=8, hidden_dim=512, spatial_dim=256, channel_dim=2048,
           channels=3, dropout=0.0, sd=0.0,
-         **block_kwargs):
+          **block_kwargs):
     return Mixer(
         image_size=image_size, patch_size=patch_size, channel=channels,
         num_classes=num_classes, depth=depth,
@@ -123,7 +126,7 @@ def large(num_classes=1000, name="mixer_l",
           image_size=224, patch_size=16,
           depth=24, hidden_dim=1024, spatial_dim=512, channel_dim=4096,
           channels=3, dropout=0.0, sd=0.0,
-         **block_kwargs):
+          **block_kwargs):
     return Mixer(
         image_size=image_size, patch_size=patch_size, channel=channels,
         num_classes=num_classes, depth=depth,
