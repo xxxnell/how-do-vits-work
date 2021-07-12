@@ -60,6 +60,17 @@ def blur(in_filters, sfilter=(1, 1), pad_mode="constant"):
     return layer
 
 
+def drop_path(x, drop_prob=0.0, training=False):
+    if drop_prob == 0. or not training:
+        return x
+    keep_prob = 1 - drop_prob
+    shape = (x.shape[0],) + (1,) * (x.ndim - 1)  # work with diff dim tensors, not just 2D ConvNets
+    random_tensor = keep_prob + torch.rand(shape, dtype=x.dtype, device=x.device)
+    random_tensor.floor_()  # binarize
+    output = x.div(keep_prob) * random_tensor
+    return output
+
+
 class SamePad(nn.Module):
 
     def __init__(self, filter_size, pad_mode="constant", **kwargs):
@@ -131,12 +142,7 @@ class DropPath(nn.Module):
         self.p = p
 
     def forward(self, x):
-        if self.training:
-            b = np.random.uniform() > self.p
-            b = float(b)
-            x = b * x
-        else:
-            x = (1 - self.p) * x
+        x = drop_path(x, self.p, self.training)
 
         return x
 
