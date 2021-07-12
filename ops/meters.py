@@ -29,6 +29,7 @@ class AverageMeter(object):
         self.std = 0.0
 
     def update(self, xs, n=1):
+        eps = 1e-7
         if isinstance(xs, int) or isinstance(xs, float):
             xs = np.array([xs] * n)
 
@@ -36,8 +37,8 @@ class AverageMeter(object):
         self.sqsum += np.sum(np.square(xs))
         self.count += np.array(xs).size
 
-        self.avg = self.sum / self.count
-        self.std = self.sqsum / self.count - self.avg ** 2
+        self.avg = self.sum / (self.count + eps)
+        self.std = self.sqsum / (self.count + eps) - self.avg ** 2
         self.std = math.sqrt(self.std) if self.std > 0.0 else 0.0
 
     def result(self):
