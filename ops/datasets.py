@@ -154,7 +154,7 @@ def get_dataset_c(name, ctype, intensity,
 
 
 def get_cifar10c(ctype, intensity, mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010),
-                 root="./data", download=True):
+                 root="./data", download=True, **kwargs):
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
@@ -164,7 +164,7 @@ def get_cifar10c(ctype, intensity, mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0
 
 
 def get_cifar100c(ctype, intensity, mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 0.2565, 0.2761),
-                  root="./data", download=True):
+                  root="./data", download=True, **kwargs):
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
@@ -173,7 +173,8 @@ def get_cifar100c(ctype, intensity, mean=(0.5071, 0.4867, 0.4408), std=(0.2675, 
     return cifarc.CIFAR100C(root, ctype, intensity, transform=transform, download=download)
 
 
-def get_imagenetc(ctype, intensity, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), root="./data"):
+def get_imagenetc(ctype, intensity, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
+                  root="./data", **kwargs):
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -185,7 +186,7 @@ def get_imagenetc(ctype, intensity, mean=(0.485, 0.456, 0.406), std=(0.229, 0.22
 
 
 def get_cifar10p(ptype, mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010),
-                 root="./data", base_folder="cifar-10-p", download=False):
+                 root="./data", base_folder="cifar-10-p", download=False, **kwargs):
     transform = transforms.Compose([
         cifarp.ToTensor(),
         cifarp.Normalize(mean, std),

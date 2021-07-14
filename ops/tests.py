@@ -74,11 +74,12 @@ def test(model, n_ff, dataset,
         acc_bin = [gacc(cm_bin) for cm_bin in cms_bin]
         conf_bin = [conf_acc / (count + 1e-7) for count, conf_acc in zip(count_bin, conf_acc_bin)]
         ece_value = ece(count_bin, acc_bin, conf_bin)
+        ecse_value = ecse(count_bin, acc_bin, conf_bin)
 
         metrics = nll_value, \
                   cutoffs, cms, accs, uncs, ious, freqs, \
                   topk_value, brier_value, \
-                  count_bin, acc_bin, conf_bin, ece_value
+                  count_bin, acc_bin, conf_bin, ece_value, ecse_value
         if verbose and int(step + 1) % period is 0:
             print("%d Steps, %s" % (int(step + 1), repr_metrics(metrics)))
 
@@ -99,7 +100,7 @@ def repr_metrics(metrics):
     nll_value, \
     cutoffs, cms, accs, uncs, ious, freqs, \
     topk_value, brier_value, \
-    count_bin, acc_bin, conf_bin, ece_value = metrics
+    count_bin, acc_bin, conf_bin, ece_value, ecse_value = metrics
 
     metrics_reprs = [
         "NLL: %.4f" % nll_value,
@@ -111,6 +112,7 @@ def repr_metrics(metrics):
         "Top-5: " + "%.3f %%" % (topk_value * 100),
         "Brier: " + "%.3f" % brier_value,
         "ECE: " + "%.3f %%" % (ece_value * 100),
+        "ECE±: " + "%.3f %%" % (ecse_value * 100),
     ]
 
     return ", ".join(metrics_reprs)
@@ -185,12 +187,12 @@ def save_metrics(metrics_dir, metrics_list):
         nll_value, \
         cutoffs, cms, accs, uncs, ious, freqs, \
         topk_value, brier_value, \
-        count_bin, acc_bin, conf_bin, ece_value = metrics
+        count_bin, acc_bin, conf_bin, ece_value, ecse_value = metrics
 
         metrics_acc.append([
             *keys,
             nll_value, *cutoffs, *accs, *uncs, *ious, *freqs,
-            topk_value, brier_value, ece_value
+            topk_value, brier_value, ece_value, ecse_value
         ])
 
     save_lists(metrics_dir, metrics_acc)
@@ -296,6 +298,15 @@ def ece(count_bin, acc_bin, conf_bin):
     freq = np.nan_to_num(count_bin / sum(count_bin))
     ece_result = np.sum(np.absolute(acc_bin - conf_bin) * freq)
     return ece_result
+
+
+def ecse(count_bin, acc_bin, conf_bin):
+    count_bin = np.array(count_bin)
+    acc_bin = np.array(acc_bin)
+    conf_bin = np.array(conf_bin)
+    freq = np.nan_to_num(count_bin / sum(count_bin))
+    ecse_result = np.sum((conf_bin - acc_bin) * freq)
+    return ecse_result
 
 
 def confidence_histogram(ax, count_bin):

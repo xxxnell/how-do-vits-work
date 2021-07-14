@@ -77,12 +77,23 @@ def train(model, optimizer,
     model = model.cuda() if gpu else model.cpu()
     warmup_time = time.time()
     for epoch in range(warmup_epochs):
+        batch_time = time.time()
         *train_metrics, = train_epoch(optimizer, model, dataset_train,
                                       smoothing=smoothing, mixup_function=mixup_function,
                                       max_norm=max_norm,
                                       scheduler=warmup_scheduler, gpu=gpu)
+        batch_time = time.time() - batch_time
+        template = "(%.2f sec/epoch) Warmup epoch: %d, Loss: %.4f, lr: %.3e"
+        print(template % (batch_time,
+                          epoch,
+                          train_metrics[0],
+                          [param_group["lr"] for param_group in optimizer.param_groups][0]))
+
+        if writer is not None and (epoch + 1) % 1 == 0:
+            *test_metrics, cal_diag = tests.test(model, n_ff, dataset_val, verbose=False, gpu=gpu)
+
     if warmup_epochs > 0:
-        print("The model is warmed up: %.2f sec" % (time.time() - warmup_time))
+        print("The model is warmed up: %.2f sec \n" % (time.time() - warmup_time))
         models.save_snapshot(model, dataset_name, uid, "warmup", optimizer, root=root) if snapshot_cond else None
 
     for epoch in range(epochs):
@@ -178,7 +189,7 @@ def add_test_metrics(writer, metrics, epoch):
     nll_value, \
     cutoffs, cms, accs, uncs, ious, freqs, \
     topk_value, brier_value, \
-    count_bin, acc_bin, conf_bin, ece_value = metrics
+    count_bin, acc_bin, conf_bin, ece_value, ecse_value = metrics
 
     writer.add_scalar("test/nll", nll_value, global_step=epoch)
     writer.add_scalar("test/acc", accs[0], global_step=epoch)
@@ -190,3 +201,4 @@ def add_test_metrics(writer, metrics, epoch):
     writer.add_scalar("test/top-5", topk_value, global_step=epoch)
     writer.add_scalar("test/brier", brier_value, global_step=epoch)
     writer.add_scalar("test/ece", ece_value, global_step=epoch)
+    writer.add_scalar("test/ecse", ecse_value, global_step=epoch)
