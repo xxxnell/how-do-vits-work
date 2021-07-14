@@ -8,7 +8,9 @@ import models.gates as gates
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, in_channels, channels, stride=1, groups=1, width_per_group=64, reduction=16, **block_kwargs):
+    def __init__(self, in_channels, channels,
+                 stride=1, groups=1, width_per_group=64, sd=0.0,
+                 reduction=16, **block_kwargs):
         super(BasicBlock, self).__init__()
 
         if groups != 1 or width_per_group != 64:
@@ -21,14 +23,18 @@ class BasicBlock(nn.Module):
             self.shortcut.append(layers.bn(channels * self.expansion))
         self.shortcut = nn.Sequential(*self.shortcut)
 
-        self.conv1 = layers.conv3x3(in_channels, width, stride=stride)
-        self.bn1 = layers.bn(width)
-        self.relu1 = layers.relu()
+        self.conv1 = nn.Sequential(
+            layers.conv3x3(in_channels, width, stride=stride),
+            layers.bn(width),
+            layers.relu()
+        )
+        self.conv2 = nn.Sequential(
+            layers.conv3x3(width, channels * self.expansion),
+            layers.bn(channels * self.expansion),
+        )
 
-        self.conv2 = layers.conv3x3(width, channels * self.expansion)
-        self.bn2 = layers.bn(channels * self.expansion)
-        self.relu2 = layers.relu()
-
+        self.relu = layers.relu()
+        self.sd = layers.DropPath(sd) if sd > 0.0 else nn.Identity()
         self.gate = nn.Sequential(
             gates.ChannelGate(channels * self.expansion, reduction, max_pool=True),
             gates.SpatialGate(kernel_size=7, max_pool=True)
@@ -38,14 +44,11 @@ class BasicBlock(nn.Module):
         skip = self.shortcut(x)
 
         x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu1(x)
         x = self.conv2(x)
-        x = self.bn2(x)
         x = self.gate(x)
 
-        x = skip + x
-        x = self.relu2(x)
+        x = self.sd(x) + skip
+        x = self.relu(x)
 
         return x
 
@@ -53,7 +56,9 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, in_channels, channels, stride=1, groups=1, width_per_group=64, reduction=16, **block_kwargs):
+    def __init__(self, in_channels, channels,
+                 stride=1, groups=1, width_per_group=64, sd=0.0,
+                 reduction=16, **block_kwargs):
         super(Bottleneck, self).__init__()
 
         width = int(channels * (width_per_group / 64.)) * groups
@@ -64,18 +69,23 @@ class Bottleneck(nn.Module):
             self.shortcut.append(layers.bn(channels * self.expansion))
         self.shortcut = nn.Sequential(*self.shortcut)
 
-        self.conv1 = layers.conv1x1(in_channels, width)
-        self.bn1 = layers.bn(width)
-        self.relu1 = layers.relu()
+        self.conv1 = nn.Sequential(
+            layers.conv1x1(in_channels, width),
+            layers.bn(width),
+            layers.relu(),
+        )
+        self.conv2 = nn.Sequential(
+            layers.conv3x3(width, width, stride=stride, groups=groups),
+            layers.bn(width),
+            layers.relu()
+        )
+        self.conv3 = nn.Sequential(
+            layers.conv1x1(width, channels * self.expansion),
+            layers.bn(channels * self.expansion),
+        )
 
-        self.conv2 = layers.conv3x3(width, width, stride=stride, groups=groups)
-        self.bn2 = layers.bn(width)
-        self.relu2 = layers.relu()
-
-        self.conv3 = layers.conv1x1(width, channels * self.expansion)
-        self.bn3 = layers.bn(channels * self.expansion)
-        self.relu3 = layers.relu()
-
+        self.relu = layers.relu()
+        self.sd = layers.DropPath(sd) if sd > 0.0 else nn.Identity()
         self.gate = nn.Sequential(
             gates.ChannelGate(channels * self.expansion, reduction, max_pool=True),
             gates.SpatialGate(kernel_size=7, max_pool=True)
@@ -85,16 +95,11 @@ class Bottleneck(nn.Module):
         skip = self.shortcut(x)
 
         x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu1(x)
         x = self.conv2(x)
-        x = self.bn2(x)
-        x = self.relu2(x)
         x = self.conv3(x)
-        x = self.bn3(x)
         x = self.gate(x)
 
-        x = skip + x
-        x = self.relu3(x)
+        x = self.sd(x) + skip
+        x = self.relu(x)
 
         return x
