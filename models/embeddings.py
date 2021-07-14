@@ -32,7 +32,7 @@ class CLSToken(nn.Module):
 
     def __init__(self, dim):
         super().__init__()
-        self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
+        self.cls_token = nn.Parameter(torch.randn(1, 1, dim) * 0.02)
 
     def forward(self, x):
         b, n, _ = x.shape
@@ -52,7 +52,7 @@ class AbsPosEmbedding(nn.Module):
         output_size = self._conv_output_size(image_size, patch_size, stride)
         num_patches = output_size ** 2
 
-        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + int(cls), dim))
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + int(cls), dim) * 0.02)
 
     def forward(self, x):
         x = x + self.pos_embedding

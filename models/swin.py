@@ -48,7 +48,7 @@ class WindowAttention(nn.Module):
         self.backshift = CyclicShift(self.d) if shifted else nn.Identity()
 
         self.rel_index = self.rel_distance(window_size) + window_size - 1
-        self.pos_embedding = nn.Parameter(torch.randn(2 * window_size - 1, 2 * window_size - 1))
+        self.pos_embedding = nn.Parameter(torch.randn(2 * window_size - 1, 2 * window_size - 1) * 0.02)
 
     def forward(self, x, mask=None):
         b, c, h, w = x.shape
@@ -159,7 +159,6 @@ class Swin(nn.Module):
                     dropout, sds):
         attn1 = partial(WindowAttention, window_size=window_size, shifted=False)
         attn2 = partial(WindowAttention, window_size=window_size, shifted=True)
-        # attn2 = partial(WindowAttention, window_size=window_size, shifted=False)
 
         seq = list()
         seq.append(PatchMerging(in_channels, hidden_dimension, pool))
