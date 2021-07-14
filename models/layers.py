@@ -32,20 +32,16 @@ def bn(dim):
     return nn.BatchNorm2d(dim)
 
 
-def bn1d(dim):
-    return nn.Sequential(
-        Rearrange('b h d ->  b d h'),
-        nn.BatchNorm1d(dim),
-        Rearrange('b d h ->  b h d'),
-    )
-
-
 def ln1d(dim):
     return nn.LayerNorm(dim)
 
 
 def ln2d(dim):
-    return nn.InstanceNorm2d(dim, affine=True)
+    return nn.Sequential(
+        Rearrange("b c h w -> b h w c"),
+        nn.LayerNorm(dim),
+        Rearrange("b h w c -> b c h w"),
+    )
 
 
 def dense(in_features, out_features, bias=True):
