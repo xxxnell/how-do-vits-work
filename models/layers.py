@@ -28,6 +28,10 @@ def relu():
     return nn.ReLU()
 
 
+def relu6(mx=6.0, mn=0.0):
+    return Lambda(lambda x: torch.clamp(x, mn, mx))
+
+
 def bn(dim):
     return nn.BatchNorm2d(dim)
 
