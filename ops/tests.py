@@ -272,7 +272,7 @@ def caccs(cm):
         if float(np.sum(cm, axis=1)[ii]) == 0:
             acc = 0.0
         else:
-            acc = np.diag(cm)[ii] / float(np.sum(cm, axis=1)[ii])
+            acc = np.diag(cm)[ii] / (float(np.sum(cm, axis=1)[ii]) + 1e-7)
         accs.append(acc)
     return accs
 
@@ -284,18 +284,18 @@ def unconfidence(cm_certain, cm_uncertain):
     inaccurate_certain = np.sum(cm_certain) - np.diag(cm_certain).sum()
     inaccurate_uncertain = np.sum(cm_uncertain) - np.diag(cm_uncertain).sum()
 
-    return inaccurate_uncertain / (inaccurate_certain + inaccurate_uncertain)
+    return inaccurate_uncertain / (inaccurate_certain + inaccurate_uncertain + 1e-7)
 
 
 def frequency(cm_certain, cm_uncertain):
-    return np.sum(cm_certain) / (np.sum(cm_certain) + np.sum(cm_uncertain))
+    return np.sum(cm_certain) / (np.sum(cm_certain) + np.sum(cm_uncertain) + 1e-7)
 
 
 def ece(count_bin, acc_bin, conf_bin):
     count_bin = np.array(count_bin)
     acc_bin = np.array(acc_bin)
     conf_bin = np.array(conf_bin)
-    freq = np.nan_to_num(count_bin / sum(count_bin))
+    freq = np.nan_to_num(count_bin / (sum(count_bin) + 1e-7))
     ece_result = np.sum(np.absolute(acc_bin - conf_bin) * freq)
     return ece_result
 
@@ -304,7 +304,7 @@ def ecse(count_bin, acc_bin, conf_bin):
     count_bin = np.array(count_bin)
     acc_bin = np.array(acc_bin)
     conf_bin = np.array(conf_bin)
-    freq = np.nan_to_num(count_bin / sum(count_bin))
+    freq = np.nan_to_num(count_bin / (sum(count_bin) + 1e-7))
     ecse_result = np.sum((conf_bin - acc_bin) * freq)
     return ecse_result
 
@@ -313,7 +313,7 @@ def confidence_histogram(ax, count_bin):
     color, alpha = "tab:green", 0.8
     centers = np.linspace(0.05, 0.95, 10)
     count_bin = np.array(count_bin)
-    freq = count_bin / sum(count_bin)
+    freq = count_bin / (sum(count_bin) + 1e-7)
 
     ax.bar(centers * 100, freq * 100, width=10, color=color, edgecolor="black", alpha=alpha)
     ax.set_xlim(0, 100.0)
