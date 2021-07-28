@@ -13,10 +13,11 @@ class ResNet(nn.Module):
                  block, num_blocks,
                  sblock=smoothing.TanhBlurBlock, num_sblocks=(0, 0, 0, 0),
                  cblock=classifier.GAPBlock,
-                 num_classes=10, stem=True, name="resnet", **block_kwargs):
-        super(ResNet, self).__init__()
-
+                 sd=0.0, num_classes=10, stem=True, name="resnet", **block_kwargs):
+        super().__init__()
         self.name = name
+        idxs = [[j for j in range(sum(num_blocks[:i]), sum(num_blocks[:i + 1]))] for i in range(len(num_blocks))]
+        sds = [[sd * j / (sum(num_blocks) - 1) for j in js] for js in idxs]
 
         self.layer0 = []
         if stem:
@@ -30,15 +31,23 @@ class ResNet(nn.Module):
             self.layer0.append(layers.relu())
         self.layer0 = nn.Sequential(*self.layer0)
 
-        self.layer1 = self._make_layer(block, 64, 64, num_blocks[0], stride=1, **block_kwargs)
-        self.layer2 = self._make_layer(block, 64 * block.expansion, 128, num_blocks[1], stride=2, **block_kwargs)
-        self.layer3 = self._make_layer(block, 128 * block.expansion, 256, num_blocks[2], stride=2, **block_kwargs)
-        self.layer4 = self._make_layer(block, 256 * block.expansion, 512, num_blocks[3], stride=2, **block_kwargs)
+        self.layer1 = self._make_layer(block, 64, 64,
+                                       num_blocks[0], stride=1, sds=sds[0], **block_kwargs)
+        self.layer2 = self._make_layer(block, 64 * block.expansion, 128,
+                                       num_blocks[1], stride=2, sds=sds[1], **block_kwargs)
+        self.layer3 = self._make_layer(block, 128 * block.expansion, 256,
+                                       num_blocks[2], stride=2, sds=sds[2], **block_kwargs)
+        self.layer4 = self._make_layer(block, 256 * block.expansion, 512,
+                                       num_blocks[3], stride=2, sds=sds[3], **block_kwargs)
 
-        self.smooth1 = self._make_smooth_layer(sblock, 64 * block.expansion, num_sblocks[0], **block_kwargs)
-        self.smooth2 = self._make_smooth_layer(sblock, 128 * block.expansion, num_sblocks[1], **block_kwargs)
-        self.smooth3 = self._make_smooth_layer(sblock, 256 * block.expansion, num_sblocks[2], **block_kwargs)
-        self.smooth4 = self._make_smooth_layer(sblock, 512 * block.expansion, num_sblocks[3], **block_kwargs)
+        self.smooth1 = self._make_smooth_layer(sblock, 64 * block.expansion,
+                                               num_sblocks[0], **block_kwargs)
+        self.smooth2 = self._make_smooth_layer(sblock, 128 * block.expansion,
+                                               num_sblocks[1], **block_kwargs)
+        self.smooth3 = self._make_smooth_layer(sblock, 256 * block.expansion,
+                                               num_sblocks[2], **block_kwargs)
+        self.smooth4 = self._make_smooth_layer(sblock, 512 * block.expansion,
+                                               num_sblocks[3], **block_kwargs)
 
         self.classifier = []
         if cblock is classifier.MLPBlock:
@@ -48,15 +57,14 @@ class ResNet(nn.Module):
             self.classifier.append(cblock(512 * block.expansion, num_classes, **block_kwargs))
         self.classifier = nn.Sequential(*self.classifier)
 
-
     @staticmethod
-    def _make_layer(block, in_channels, out_channels, num_blocks, stride, **block_kwargs):
-        stride_arr = [stride] + [1] * (num_blocks - 1)
-        layers, channels = [], in_channels
-        for stride in stride_arr:
-            layers.append(block(channels, out_channels, stride=stride, **block_kwargs))
+    def _make_layer(block, in_channels, out_channels, num_blocks, stride, sds, **block_kwargs):
+        stride_seq = [stride] + [1] * (num_blocks - 1)
+        layer_seq, channels = [], in_channels
+        for i in range(num_blocks):
+            layer_seq.append(block(channels, out_channels, stride=stride_seq[i], sd=sds[i], **block_kwargs))
             channels = out_channels * block.expansion
-        return nn.Sequential(*layers)
+        return nn.Sequential(*layer_seq)
 
     @staticmethod
     def _make_smooth_layer(sblock, in_filters, num_blocks, **block_kwargs):
