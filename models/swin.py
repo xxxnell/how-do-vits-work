@@ -36,10 +36,10 @@ class PatchMerging(nn.Module):
 class WindowAttention(nn.Module):
 
     def __init__(self, dim_in, dim_out=None, *,
-                 heads=8, head_dim=32, dropout=0.0, window_size=7, shifted=False):
+                 heads=8, dim_head=32, dropout=0.0, window_size=7, shifted=False):
         super().__init__()
         self.attn = Attention1d(dim_in, dim_out,
-                                heads=heads, head_dim=head_dim, dropout=dropout)
+                                heads=heads, dim_head=dim_head, dropout=dropout)
         self.window_size = window_size
         self.shifted = shifted
         self.d = window_size // 2
@@ -106,8 +106,8 @@ class WindowAttention(nn.Module):
 class Swin(nn.Module):
 
     def __init__(self, *,
-                 num_classes, depths, dims, heads, mlp_dims,
-                 channel=3, head_dim=32, window_size=7, pools=(4, 2, 2, 2),
+                 num_classes, depths, dims, heads, dims_mlp,
+                 channel=3, dim_head=32, window_size=7, pools=(4, 2, 2, 2),
                  dropout=0.0, sd=0.0,
                  classifier=None,
                  name="swin", **block_kwargs):
@@ -118,22 +118,22 @@ class Swin(nn.Module):
 
         self.layer1 = self._make_layer(
             in_channels=channel, hidden_dimension=dims[0], depth=depths[0], window_size=window_size,
-            pool=pools[0], num_heads=heads[0], head_dim=head_dim, mlp_dim=mlp_dims[0],
+            pool=pools[0], num_heads=heads[0], dim_head=dim_head, dim_mlp=dims_mlp[0],
             dropout=dropout, sds=sds[0],
         )
         self.layer2 = self._make_layer(
             in_channels=dims[0], hidden_dimension=dims[1], depth=depths[1], window_size=window_size,
-            pool=pools[1], num_heads=heads[1], head_dim=head_dim, mlp_dim=mlp_dims[1],
+            pool=pools[1], num_heads=heads[1], dim_head=dim_head, dim_mlp=dims_mlp[1],
             dropout=dropout, sds=sds[1],
         )
         self.layer3 = self._make_layer(
             in_channels=dims[1], hidden_dimension=dims[2], depth=depths[2], window_size=window_size,
-            pool=pools[2], num_heads=heads[2], head_dim=head_dim, mlp_dim=mlp_dims[2],
+            pool=pools[2], num_heads=heads[2], dim_head=dim_head, dim_mlp=dims_mlp[2],
             dropout=dropout, sds=sds[2],
         )
         self.layer4 = self._make_layer(
             in_channels=dims[2], hidden_dimension=dims[3], depth=depths[3], window_size=window_size,
-            pool=pools[3], num_heads=heads[3], head_dim=head_dim, mlp_dim=mlp_dims[3],
+            pool=pools[3], num_heads=heads[3], dim_head=dim_head, dim_mlp=dims_mlp[3],
             dropout=dropout, sds=sds[3],
         )
 
@@ -155,7 +155,7 @@ class Swin(nn.Module):
 
     @staticmethod
     def _make_layer(in_channels, hidden_dimension, depth, window_size,
-                    pool, num_heads, head_dim, mlp_dim,
+                    pool, num_heads, dim_head, dim_mlp,
                     dropout, sds):
         attn1 = partial(WindowAttention, window_size=window_size, shifted=False)
         attn2 = partial(WindowAttention, window_size=window_size, shifted=True)
@@ -165,13 +165,13 @@ class Swin(nn.Module):
         for i in range(depth // 2):
             wt = Transformer(
                 hidden_dimension,
-                heads=num_heads, head_dim=head_dim, mlp_dim=mlp_dim, norm=ln2d,
+                heads=num_heads, dim_head=dim_head, dim_mlp=dim_mlp, norm=ln2d,
                 attn=attn1, f=partial(nn.Conv2d, kernel_size=1),
                 dropout=dropout, sd=sds[2 * i]
             )
             swt = Transformer(
                 hidden_dimension,
-                heads=num_heads, head_dim=head_dim, mlp_dim=mlp_dim, norm=ln2d,
+                heads=num_heads, dim_head=dim_head, dim_mlp=dim_mlp, norm=ln2d,
                 attn=attn2, f=partial(nn.Conv2d, kernel_size=1),
                 dropout=dropout, sd=sds[2 * i + 1]
             )
@@ -181,28 +181,28 @@ class Swin(nn.Module):
 
 
 def swin_t(num_classes,
-           dims=(96, 192, 384, 768), depths=(2, 2, 6, 2), heads=(3, 6, 12, 24), mlp_dims=(384, 768, 1536, 3072),
+           dims=(96, 192, 384, 768), depths=(2, 2, 6, 2), heads=(3, 6, 12, 24), dims_mlp=(384, 768, 1536, 3072),
            name="swin_t", **kwargs):
-    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, mlp_dims=mlp_dims,
+    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, dims_mlp=dims_mlp,
                 name=name, **kwargs)
 
 
 def swin_s(num_classes,
-           dims=(96, 192, 384, 768), depths=(2, 2, 18, 2), heads=(3, 6, 12, 24), mlp_dims=(384, 768, 1536, 3072),
+           dims=(96, 192, 384, 768), depths=(2, 2, 18, 2), heads=(3, 6, 12, 24), dims_mlp=(384, 768, 1536, 3072),
            name="swin_s", **kwargs):
-    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, mlp_dims=mlp_dims,
+    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, dims_mlp=dims_mlp,
                 name=name, **kwargs)
 
 
 def swin_b(num_classes,
-           dims=(128, 256, 512, 1024), depths=(2, 2, 18, 2), heads=(4, 8, 16, 32), mlp_dims=(512, 1024, 2048, 4096),
+           dims=(128, 256, 512, 1024), depths=(2, 2, 18, 2), heads=(4, 8, 16, 32), dims_mlp=(512, 1024, 2048, 4096),
            name="swin_b", **kwargs):
-    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, mlp_dims=mlp_dims,
+    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, dims_mlp=dims_mlp,
                 name=name, **kwargs)
 
 
 def swin_l(num_classes,
-           dims=(192, 384, 768, 1536), depths=(2, 2, 6, 2), heads=(3, 6, 12, 24), mlp_dims=(768, 1536, 3072, 6144),
+           dims=(192, 384, 768, 1536), depths=(2, 2, 6, 2), heads=(3, 6, 12, 24), dims_mlp=(768, 1536, 3072, 6144),
            name="swin_l", **kwargs):
-    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, mlp_dims=mlp_dims,
+    return Swin(num_classes=num_classes, dims=dims, depths=depths, heads=heads, dims_mlp=dims_mlp,
                 name=name, **kwargs)

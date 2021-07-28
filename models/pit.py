@@ -51,22 +51,22 @@ class Pool(nn.Module):
 class PiT(nn.Module):
 
     def __init__(self, *,
-                 image_size, patch_size, num_classes, dims, depths, heads, head_dims, mlp_dims,
+                 image_size, patch_size, num_classes, dims, depths, heads, dims_head, dims_mlp,
                  channel=3, dropout=0.0, emb_dropout=0.0, sd=0.0, stride=None,
                  embedding=None, classifier=None,
                  name="pit"):
         super().__init__()
         self.name = name
 
-        if len(depths) is not 3:
+        if len(depths) != 3:
             msg = "`depths` must be a tuple of integers with len of 3, " + \
                   "specifying the number of blocks before each downsizing."
             raise Exception(msg)
         dims = self._to_tuple(dims, len(depths))
         dims = (dims[0], *dims)  # (stem_dim, *stage_dims)
         heads = self._to_tuple(heads, len(depths))
-        head_dims = self._to_tuple(head_dims, len(depths))
-        mlp_dims = self._to_tuple(mlp_dims, len(depths))
+        dims_head = self._to_tuple(dims_head, len(depths))
+        dims_mlp = self._to_tuple(dims_mlp, len(depths))
         idxs = [[j for j in range(sum(depths[:i]), sum(depths[:i + 1]))] for i in range(len(depths))]
         sds = [[sd * j / (sum(depths) - 1) for j in js] for js in idxs]
         pools = [False] + [True] * (len(depths) - 1)
@@ -85,7 +85,7 @@ class PiT(nn.Module):
             for j in range(depths[i]):
                 self.transformers.append(
                     Transformer(dims[i+1],
-                                heads=heads[i], head_dim=head_dims[i], mlp_dim=mlp_dims[i],
+                                heads=heads[i], dim_head=dims_head[i], dim_mlp=dims_mlp[i],
                                 dropout=dropout, sd=sds[i][j])
                 )
         self.transformers = nn.Sequential(*self.transformers)
@@ -110,55 +110,55 @@ class PiT(nn.Module):
 
 def tiny(num_classes=1000, name="pit_ti",
          image_size=224, patch_size=16, channel=3, stride=8,
-         dims=(64, 128, 256), depths=(2, 6, 4), heads=(2, 4, 8), head_dims=(32, 32, 32),
-         mlp_dims=(256, 512, 1024), dropout=0.0, emb_dropout=0.0, sd=0.0,
+         dims=(64, 128, 256), depths=(2, 6, 4), heads=(2, 4, 8), dims_head=(32, 32, 32),
+         dims_mlp=(256, 512, 1024), dropout=0.0, emb_dropout=0.0, sd=0.0,
          **block_kwargs):
     return PiT(
         image_size=image_size, patch_size=patch_size, channel=channel, stride=stride,
         num_classes=num_classes, depths=depths,
-        dims=dims, heads=heads, head_dims=head_dims,
-        mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
+        dims=dims, heads=heads, dims_head=dims_head,
+        dims_mlp=dims_mlp, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
         name=name, **block_kwargs
     )
 
 
 def xsmall(num_classes=1000, name="pit_xs",
            image_size=224, patch_size=16, channel=3, stride=8,
-           dims=(96, 192, 384), depths=(2, 6, 4), heads=(2, 4, 8), head_dims=(48, 48, 48),
-           mlp_dims=(384, 768, 1024), dropout=0.0, emb_dropout=0.0, sd=0.0,
+           dims=(96, 192, 384), depths=(2, 6, 4), heads=(2, 4, 8), dims_head=(48, 48, 48),
+           dims_mlp=(384, 768, 1024), dropout=0.0, emb_dropout=0.0, sd=0.0,
            **block_kwargs):
     return PiT(
         image_size=image_size, patch_size=patch_size, channel=channel, stride=stride,
         num_classes=num_classes, depths=depths,
-        dims=dims, heads=heads, head_dims=head_dims,
-        mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
+        dims=dims, heads=heads, dims_head=dims_head,
+        dims_mlp=dims_mlp, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
         name=name, **block_kwargs
     )
 
 
 def small(num_classes=1000, name="pit_s",
-         image_size=224, patch_size=16, channel=3, stride=8,
-         dims=(144, 288, 576), depths=(2, 6, 4), heads=(3, 6, 12), head_dims=(48, 48, 48),
-         mlp_dims=(576, 1152, 2304), dropout=0.0, emb_dropout=0.0, sd=0.0,
-         **block_kwargs):
+          image_size=224, patch_size=16, channel=3, stride=8,
+          dims=(144, 288, 576), depths=(2, 6, 4), heads=(3, 6, 12), dims_head=(48, 48, 48),
+          dims_mlp=(576, 1152, 2304), dropout=0.0, emb_dropout=0.0, sd=0.0,
+          **block_kwargs):
     return PiT(
         image_size=image_size, patch_size=patch_size, channel=channel, stride=stride,
         num_classes=num_classes, depths=depths,
-        dims=dims, heads=heads, head_dims=head_dims,
-        mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
+        dims=dims, heads=heads, dims_head=dims_head,
+        dims_mlp=dims_mlp, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
         name=name, **block_kwargs
     )
 
 
 def base(num_classes=1000, name="pit_base",
          image_size=224, patch_size=16, channel=3, stride=7,
-         dims=(256, 512, 1024), depths=(3, 6, 4), heads=(4, 8, 16), head_dims=(64, 64, 64),
-         mlp_dims=(256, 512, 1024), dropout=0.0, emb_dropout=0.0, sd=0.0,
+         dims=(256, 512, 1024), depths=(3, 6, 4), heads=(4, 8, 16), dims_head=(64, 64, 64),
+         dims_mlp=(256, 512, 1024), dropout=0.0, emb_dropout=0.0, sd=0.0,
          **block_kwargs):
     return PiT(
         image_size=image_size, patch_size=patch_size, channel=channel, stride=stride,
         num_classes=num_classes, depths=depths,
-        dims=dims, heads=heads, head_dims=head_dims,
-        mlp_dims=mlp_dims, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
+        dims=dims, heads=heads, dims_head=dims_head,
+        dims_mlp=dims_mlp, dropout=dropout, emb_dropout=emb_dropout, sd=sd,
         name=name, **block_kwargs
     )

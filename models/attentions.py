@@ -34,13 +34,13 @@ class FeedForward(nn.Module):
 class Attention1d(nn.Module):
 
     def __init__(self, dim_in, dim_out=None, *,
-                 heads=8, head_dim=64, dropout=0.0):
+                 heads=8, dim_head=64, dropout=0.0):
         super().__init__()
-        inner_dim = head_dim * heads
+        inner_dim = dim_head * heads
         dim_out = dim_in if dim_out is None else dim_out
 
         self.heads = heads
-        self.scale = head_dim ** -0.5
+        self.scale = dim_head ** -0.5
 
         self.to_qkv = nn.Linear(dim_in, inner_dim * 3, bias=False)
 
@@ -68,7 +68,7 @@ class Attention1d(nn.Module):
 class Transformer(nn.Module):
 
     def __init__(self, dim_in, dim_out=None, *,
-                 heads=8, head_dim=64, mlp_dim=1024, dropout=0.0, sd=0.0,
+                 heads=8, dim_head=64, dim_mlp=1024, dropout=0.0, sd=0.0,
                  attn=Attention1d, norm=nn.LayerNorm,
                  f=nn.Linear, activation=nn.GELU):
         super().__init__()
@@ -81,11 +81,11 @@ class Transformer(nn.Module):
         self.shortcut = nn.Sequential(*self.shortcut)
 
         self.norm1 = norm(dim_in)
-        self.attn = attn(dim_in, dim_out, heads=heads, head_dim=head_dim, dropout=dropout)
+        self.attn = attn(dim_in, dim_out, heads=heads, dim_head=dim_head, dropout=dropout)
         self.sd1 = DropPath(sd) if sd > 0.0 else nn.Identity()
 
         self.norm2 = norm(dim_out)
-        self.ff = FeedForward(dim_out, mlp_dim, dim_out, dropout=dropout, f=f, activation=activation)
+        self.ff = FeedForward(dim_out, dim_mlp, dim_out, dropout=dropout, f=f, activation=activation)
         self.sd2 = DropPath(sd) if sd > 0.0 else nn.Identity()
 
     def forward(self, x, mask=None):

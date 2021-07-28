@@ -12,8 +12,8 @@ from models.attentions import Transformer
 class ViT(nn.Module):
 
     def __init__(self, *,
-                 image_size, patch_size, num_classes, depth, dim, heads, mlp_dim,
-                 channel=3, head_dim=64, dropout=0.0, emb_dropout=0.0, sd=0.0,
+                 image_size, patch_size, num_classes, depth, dim, heads, dim_mlp,
+                 channel=3, dim_head=64, dropout=0.0, emb_dropout=0.0, sd=0.0,
                  embedding=None, classifier=None,
                  name="vit", **block_kwargs):
         super().__init__()
@@ -29,7 +29,7 @@ class ViT(nn.Module):
         self.transformers = []
         for i in range(depth):
             self.transformers.append(
-                Transformer(dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim,
+                Transformer(dim, heads=heads, dim_head=dim_head, dim_mlp=dim_mlp,
                             dropout=dropout, sd=(sd * i / (depth - 1)))
             )
         self.transformers = nn.Sequential(*self.transformers)
@@ -50,59 +50,59 @@ class ViT(nn.Module):
 
 def tiny(num_classes=1000, name="vit_ti",
          image_size=224, patch_size=16, channel=3,
-         depth=12, dim=192, heads=3, head_dim=64, mlp_dim=768,
+         depth=12, dim=192, heads=3, dim_head=64, dim_mlp=768,
          **block_kwargs):
     return ViT(
         image_size=image_size, patch_size=patch_size, channel=channel,
         num_classes=num_classes, depth=depth,
-        dim=dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim,
+        dim=dim, heads=heads, dim_head=dim_head, dim_mlp=dim_mlp,
         name=name, **block_kwargs,
     )
 
 
 def small(num_classes=1000, name="vit_s",
           image_size=224, patch_size=16, channel=3,
-          depth=12, dim=384, heads=6, head_dim=64, mlp_dim=1536,
+          depth=12, dim=384, heads=6, dim_head=64, dim_mlp=1536,
           **block_kwargs):
     return ViT(
         image_size=image_size, patch_size=patch_size, channel=channel,
         num_classes=num_classes, depth=depth,
-        dim=dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim,
+        dim=dim, heads=heads, dim_head=dim_head, dim_mlp=dim_mlp,
         name=name, **block_kwargs,
     )
 
 
 def base(num_classes=1000, name="vit_b",
          image_size=224, patch_size=16, channel=3,
-         depth=12, dim=768, heads=12, head_dim=64, mlp_dim=3072,
+         depth=12, dim=768, heads=12, dim_head=64, dim_mlp=3072,
          **block_kwargs):
     return ViT(
         image_size=image_size, patch_size=patch_size, channel=channel,
         num_classes=num_classes, depth=depth,
-        dim=dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim,
+        dim=dim, heads=heads, dim_head=dim_head, dim_mlp=dim_mlp,
         name=name, **block_kwargs,
     )
 
 
 def large(num_classes=1000, name="vit_l",
           image_size=224, patch_size=16, channel=3,
-          depth=24, dim=1024, heads=16, head_dim=64, mlp_dim=4096,
+          depth=24, dim=1024, heads=16, dim_head=64, dim_mlp=4096,
           **block_kwargs):
     return ViT(
         image_size=image_size, patch_size=patch_size, channel=channel,
         num_classes=num_classes, depth=depth,
-        dim=dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim,
+        dim=dim, heads=heads, dim_head=dim_head, dim_mlp=dim_mlp,
         name=name, **block_kwargs,
     )
 
 
 def huge(num_classes=1000, name="vit_h",
          image_size=224, patch_size=16, channel=3,
-         depth=32, dim=1280, heads=16, head_dim=80, mlp_dim=5120,
+         depth=32, dim=1280, heads=16, dim_head=80, dim_mlp=5120,
          **block_kwargs):
     return ViT(
         image_size=image_size, patch_size=patch_size, channel=channel,
         num_classes=num_classes, depth=depth,
-        dim=dim, heads=heads, head_dim=head_dim, mlp_dim=mlp_dim,
+        dim=dim, heads=heads, dim_head=dim_head, dim_mlp=dim_mlp,
         name=name, **block_kwargs,
     )
