@@ -11,12 +11,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 
+from timm.loss import SoftTargetCrossEntropy, LabelSmoothingCrossEntropy
+
 import ops.meters as meters
 
 
 @torch.no_grad()
 def test(model, n_ff, dataset,
-         cutoffs=(0.0, 0.9), bins=np.linspace(0.0, 1.0, 11), verbose=False, period=10, gpu=True):
+         transform=None, smoothing=0.0,
+         cutoffs=(0.0, 0.9), bins=np.linspace(0.0, 1.0, 11),
+         verbose=False, period=10, gpu=True):
     model.eval()
     model = model.cuda() if gpu else model.cpu()
     xs, ys = next(iter(dataset))
@@ -40,15 +44,30 @@ def test(model, n_ff, dataset,
             xs = xs.cuda()
             ys = ys.cuda()
 
+        if transform is not None:
+            xs, ys_t = transform(xs, ys)
+        else:
+            xs, ys_t = xs, ys
+
+        if len(ys_t.shape) > 1:
+            loss_function = SoftTargetCrossEntropy()
+            ys = torch.max(ys_t, dim=-1)[1]
+        elif smoothing > 0.0:
+            loss_function = LabelSmoothingCrossEntropy(smoothing=smoothing)
+        else:
+            loss_function = nn.CrossEntropyLoss()
+        loss_function = loss_function.cuda() if gpu else loss_function
+
         # A. Predict results
         ys_pred = torch.stack([F.softmax(model(xs), dim=1) for _ in range(n_ff)])
         ys_pred = torch.mean(ys_pred, dim=0)
 
+        ys_t = ys_t.cpu()
         ys = ys.cpu()
         ys_pred = ys_pred.cpu()
 
         # B. Measure Confusion Matrices
-        nll_meter.update(F.nll_loss(torch.log(ys_pred), ys, reduction="none").numpy())
+        nll_meter.update(loss_function(torch.log(ys_pred), ys_t).numpy())
         topk_meter.update(topk(ys.numpy(), ys_pred.numpy()))
         brier_meter.update(brier(ys.numpy(), ys_pred.numpy()))
 
@@ -80,7 +99,7 @@ def test(model, n_ff, dataset,
                   cutoffs, cms, accs, uncs, ious, freqs, \
                   topk_value, brier_value, \
                   count_bin, acc_bin, conf_bin, ece_value, ecse_value
-        if verbose and int(step + 1) % period is 0:
+        if verbose and int(step + 1) % period == 0:
             print("%d Steps, %s" % (int(step + 1), repr_metrics(metrics)))
 
     print(repr_metrics(metrics))
@@ -333,9 +352,9 @@ def reliability_diagram(ax, accs_bins, colors="tab:red", mode=0):
 
     ax.plot(guides_x * 100, guides_y * 100, linestyle=guideline_style, color="black")
     for accs_bin, color in zip(accs_bins, colors):
-        if mode is 0:
+        if mode == 0:
             ax.bar(centers * 100, accs_bin * 100, width=10, color=color, edgecolor="black", alpha=alpha)
-        elif mode is 1:
+        elif mode == 1:
             ax.plot(centers * 100, accs_bin * 100, color=color, marker="o", alpha=alpha)
         else:
             raise ValueError("Invalid mode %d." % mode)
