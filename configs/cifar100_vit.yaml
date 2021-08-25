@@ -12,18 +12,18 @@ dataset:
   - 0.2761
   padding: 4
   color_jitter: 0.0
-  auto_augment: rand-m9-n2-mstd0.5
-  re_prob: 0.25
+  auto_augment: rand-m9-n2-mstd1.0
+  re_prob: 0.0
 train:
   warmup_epochs: 5
   epochs: 300
   batch_size: 96
-  max_norm: 1
+  max_norm: 5
   smoothing: 0.1
   mixup:
     num_classes: 100
-    mixup_alpha: 0.8 
-    cutmix_alpha: 0.8 
+    mixup_alpha: 1.0 
+    cutmix_alpha: 0.8
     prob: 1.0
 val:
   batch_size: 256
