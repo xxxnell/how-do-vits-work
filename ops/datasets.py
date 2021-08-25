@@ -125,6 +125,27 @@ def get_imagenet(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
     return dataset_train, dataset_test
 
 
+def subsample(dataset, ratio):
+    """
+    Get indices of subsampled dataset with given ratio.
+    """
+    idxs = list(range(len(dataset)))
+    idxs_sorted = {}
+    for idx, target in zip(idxs, dataset.targets):
+        if target in idxs_sorted:
+            idxs_sorted[target].append(idx)
+        else:
+            idxs_sorted[target] = [idx]
+
+    for idx in idxs_sorted:
+        size = len(idxs_sorted[idx])
+        lenghts = (int(size * ratio), size - int(size * ratio))
+        idxs_sorted[idx] = torch.utils.data.random_split(idxs_sorted[idx], lenghts)[0]
+
+    idxs = [idx for idxs in idxs_sorted.values() for idx in idxs]
+    return idxs
+
+
 def get_corruptions(extra=False):
     corruption_list = [
         "gaussian_noise", "shot_noise", "impulse_noise",  # noise
