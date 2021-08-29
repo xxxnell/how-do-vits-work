@@ -1,0 +1,35 @@
+---
+dataset:
+  name: cifar100
+  root: "../data"
+  mean:
+  - 0.5071
+  - 0.4867
+  - 0.4408
+  std:
+  - 0.2675
+  - 0.2565
+  - 0.2761
+  padding: 4
+train:
+  warmup_epochs: 5
+  epochs: 300
+  batch_size: 96
+val:
+  batch_size: 256
+  n_ff: 1
+model:
+  stem: false
+  block:
+    image_size: 32
+    patch_size: 2
+    sd: 0.1
+optim:
+  name: AdamW
+  lr: 1.25e-4
+  weight_decay: 0.05
+  scheduler:
+    name: CosineAnnealingLR
+    T_max: 300
+    eta_min: 0
+env: {}
