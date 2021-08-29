@@ -357,6 +357,7 @@ def save_snapshot(model, dataset_name, uid, typ, optimizer=None, root="models_ch
     Path(snapshot_path).mkdir(parents=True, exist_ok=True)
     _save(model, save_path % typ, optimizer)
 
+
 def _save(model, save_path, optimizer=None):
     save_obj = {
         "name": model.name,
