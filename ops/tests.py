@@ -122,7 +122,7 @@ def repr_metrics(metrics):
     count_bin, acc_bin, conf_bin, ece_value, ecse_value = metrics
 
     metrics_reprs = [
-        "NLL: %.4f" % nll_value,
+        "NLL: %.4f" % nll_value if nll_value > 0.01 else "NLL: %.4e" % nll_value,
         "Cutoffs: " + ", ".join(["%.1f %%" % (cutoff * 100) for cutoff in cutoffs]),
         "Accs: " + ", ".join(["%.3f %%" % (acc * 100) for acc in accs]),
         "Uncs: " + ", ".join(["%.3f %%" % (unc * 100) for unc in uncs]),
