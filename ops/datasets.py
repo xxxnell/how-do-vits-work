@@ -125,7 +125,7 @@ def get_imagenet(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225),
     return dataset_train, dataset_test
 
 
-def subsample(dataset, ratio):
+def subsample(dataset, ratio, random=True):
     """
     Get indices of subsampled dataset with given ratio.
     """
@@ -140,7 +140,10 @@ def subsample(dataset, ratio):
     for idx in idxs_sorted:
         size = len(idxs_sorted[idx])
         lenghts = (int(size * ratio), size - int(size * ratio))
-        idxs_sorted[idx] = torch.utils.data.random_split(idxs_sorted[idx], lenghts)[0]
+        if random:
+            idxs_sorted[idx] = torch.utils.data.random_split(idxs_sorted[idx], lenghts)[0]
+        else:
+            idxs_sorted[idx] = idxs_sorted[idx][:lenghts[0]]
 
     idxs = [idx for idxs in idxs_sorted.values() for idx in idxs]
     return idxs
