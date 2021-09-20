@@ -62,7 +62,7 @@ def create_bases(model, kws=None, gpu=True):
     return bases
 
 
-def get_loss_landscape(model, n_ff, dataset,
+def get_loss_landscape(model, n_ff, dataset, transform=None,
                        bases=None, kws=None,
                        cutoffs=(0.0, 0.9), bins=np.linspace(0.0, 1.0, 11), verbose=False, period=10, gpu=True,
                        x_min=-1.0, x_max=1.0, n_x=11, y_min=-1.0, y_max=1.0, n_y=11):
@@ -83,7 +83,7 @@ def get_loss_landscape(model, n_ff, dataset,
         model.load_state_dict(gs)
 
         print("Grid: ", ratio, end=", ")
-        *metrics, cal_diag = tests.test(model, n_ff, dataset,
+        *metrics, cal_diag = tests.test(model, n_ff, dataset, transform=transform,
                                         cutoffs=cutoffs, bins=bins, verbose=verbose, period=period, gpu=gpu)
         l1, l2 = norm.l1(model, gpu).item(), norm.l2(model, gpu).item()
         metrics_grid[tuple(ratio)] = (l1, l2, *metrics)
