@@ -26,6 +26,7 @@ def get_dataset(name, root="./data", download=False, **kwargs):
 
 
 def get_cifar10(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010),
+                padding=None,
                 scale=None, ratio=None,
                 hflip=0.5, vflip=0.0,
                 color_jitter=0.0,
@@ -33,7 +34,7 @@ def get_cifar10(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010),
                 interpolation='random',
                 re_prob=0.0, re_mode='const', re_count=1, re_num_splits=0,
                 root="./data", download=False):
-    transform_train = tff.transforms_imagenet_train(
+    transform_trains = tff.transforms_imagenet_train(
         img_size=32, mean=mean, std=std,
         scale=scale, ratio=ratio,
         hflip=hflip, vflip=vflip,
@@ -41,7 +42,17 @@ def get_cifar10(mean=(0.4914, 0.4822, 0.4465), std=(0.2023, 0.1994, 0.2010),
         auto_augment=auto_augment,
         interpolation=interpolation,
         re_prob=re_prob, re_mode=re_mode, re_count=re_count, re_num_splits=re_num_splits,
+        separate=True
     )
+
+    if padding is not None:
+        padding = tuple(padding) if isinstance(padding, list) else padding
+        tfl = [transforms.RandomCrop(32, padding=padding)]
+        tfl.append(transforms.RandomHorizontalFlip(p=hflip)) if hflip > 0 else None
+        tfl.append(transforms.RandomVerticalFlip(p=vflip)) if vflip > 0 else None
+        transform_trains = (transforms.Compose(tfl), *transform_trains[1:])
+
+    transform_train = transforms.Compose(transform_trains)
 
     transform_test = tff.transforms_imagenet_eval(
         img_size=32, mean=mean, std=std,
