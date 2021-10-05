@@ -1,0 +1,45 @@
+dataset:
+  name: imagenet
+  root: ../data
+  mean:
+  - 0.485
+  - 0.456
+  - 0.406
+  std:
+  - 0.229
+  - 0.224
+  - 0.225
+  color_jitter: 0.0
+  auto_augment: rand-m9-n2-mstd0.5
+  re_prob: 0.25
+train:
+#   batch_size: 256
+  batch_size: 128
+  epochs: 300
+  warmup_epochs: 5
+#   max_norm: 5
+  smoothing: 0.1
+  mixup:
+    num_classes: 1000
+    mixup_alpha: 1.0 
+    cutmix_alpha: 0.8
+    prob: 1.0
+val:
+  batch_size: 256
+  n_ff: 1
+model:
+  stem: true
+  block:
+    image_size: 224
+    patch_size: 16
+    sd: 0.1
+optim:
+  name: AdamW
+#   lr: 2.5e-4
+  lr: 1.25e-4
+  scheduler:
+    name: CosineAnnealingLR
+    T_max: 300
+    eta_min: 0
+  weight_decay: 0.05
+env: {}
