@@ -65,6 +65,42 @@ class Attention1d(nn.Module):
         return out, attn
 
 
+class Attention2d(nn.Module):
+
+    def __init__(self, dim_in, dim_out=None, *,
+                 heads=8, dim_head=64, dropout=0.0, k=1):
+        super().__init__()
+        self.heads = heads
+        self.scale = dim_head ** -0.5
+
+        inner_dim = dim_head * heads
+        dim_out = dim_in if dim_out is None else dim_out
+
+        self.to_q = nn.Conv2d(dim_in, inner_dim * 1, 1, bias=False)
+        self.to_kv = nn.Conv2d(dim_in, inner_dim * 2, k, stride=k, bias=False)
+
+        self.to_out = nn.Sequential(
+            nn.Conv2d(inner_dim, dim_out, 1),
+            nn.Dropout(dropout) if dropout > 0.0 else nn.Identity()
+        )
+
+    def forward(self, x, mask=None):
+        b, n, _, y = x.shape
+        qkv = (self.to_q(x), *self.to_kv(x).chunk(2, dim=1))
+        q, k, v = map(lambda t: rearrange(t, 'b (h d) x y -> b h (x y) d', h=self.heads), qkv)
+
+        dots = einsum('b h i d, b h j d -> b h i j', q, k) * self.scale
+        dots = dots + mask if mask is not None else dots
+        attn = dots.softmax(dim=-1)
+
+        out = einsum('b h i j, b h j d -> b h i d', attn, v)
+        out = rearrange(out, 'b h (x y) d -> b (h d) x y', y=y)
+
+        out = self.to_out(out)
+
+        return out, attn
+
+
 class Transformer(nn.Module):
 
     def __init__(self, dim_in, dim_out=None, *,
@@ -100,4 +136,3 @@ class Transformer(nn.Module):
         x = self.sd2(x) + skip
 
         return x
-
