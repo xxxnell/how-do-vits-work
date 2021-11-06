@@ -9,21 +9,29 @@ In particular, we address the following three key questions of multi-head self-a
 2. Do MSAs act like Convs? If not, how are they different?
 3. How can we harmonize MSAs with Convs? Can we just leverage their advantages?
 
-
+<br />
+<br />
 
 <img src="resources/vit/loss-landscape.png" style="width:100%;">
 
 **What properties of MSAs do we need to improve optimization?** MSAs improve not only accuracy but also generalization by flattening the loss landscapes. *Such improvement is primarily attributable to their data specificity, not long-range dependency*. Their weak inductive bias disrupts NN training. On the other hand, ViTs suffers from non-convex losses. MSAs allow negative Hessian eigenvalues in small data regimes. Large datasets and loss landscape smoothing methods alleviate this problem.
 
 
+<br />
+<br />
+
 <img src="resources/vit/fourier.png" style="width:100%;">
 
 **Do MSAs act like Convs?** MSAs and Convs exhibit opposite behaviors. For example, MSAs are low-pass filters, but Convs are high-pass filters. In addition, Convs are vulnerable to high-frequency noise but that MSAs are not. Therefore, MSAs and Convs are complementary.
 
+<br />
+<br />
 
 <img src="resources/vit/architecture.png" style="width:100%;">
 
 **How can we harmonize MSAs with Convs?** Multi-stage neural networks behave like a series connection of small individual models. In addition, MSAs at the end of a stage play a key role in prediction. Based on these insights, we propose design rules to harmonize MSAs with Convs. NN stages using this design pattern consists of a number of CNN blocks and one (or a few) MSA block. The design pattern naturally derives the structure of canonical Transformer, which has one MLP block for one MSA block.
+
+<br />
 
 <img src="resources/vit/alternet.png" style="width:100%;">
 
