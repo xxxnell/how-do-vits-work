@@ -48,12 +48,13 @@ This repository is based on [the official implementation of "Blurs Make Results 
 
 The following packages are required:
 
-* pytorch==1.6.0
-* matplotlib==3.1.1
-* notebook==5.7.10
-* ipywidgets==7.5.1 
+* pytorch
+* matplotlib
+* notebook
+* ipywidgets
+* timm
+* einops
 * tensorboard
-* timm (optional)
 * seaborn (optional)
 
 We mainly use docker images `pytorch/pytorch:1.9.0-cuda11.1-cudnn8-runtime` for the code. 
