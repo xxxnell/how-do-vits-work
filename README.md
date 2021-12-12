@@ -2,16 +2,16 @@
 
 # How Do Vision Transformers Work?
 
-This repository provides a PyTorch implementation of "How Do Vision Transformers Work?" In the paper, we show that (1) multi-head self-attentions (MSAs) flatten the loss landscapes, (2) MSA and Convs are complementary because MSAs are low-pass filters and convolutions (Convs) are high-pass filter, and (3) MSAs at the end of a stage significantly improve the accuracy. 
-
+This repository provides a PyTorch implementation of "How Do Vision Transformers Work?" In the paper, we show that multi-head self-attentions (MSAs) for computer vision is ***NOT*** for capturing long-range dependency. 
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
 
 1. *What properties of MSAs do we need to better optimize NNs?* Do the long-range dependencies of MSAs help NNs learn?
 2. *Do MSAs act like Convs?* If not, how are they different?
 3. *How can we harmonize MSAs with Convs?* Can we just leverage their advantages?
 
-Let's find the answer below!
+We demonstrate that (1) MSAs flatten the loss landscapes, (2) MSA and Convs are complementary because MSAs are low-pass filters and convolutions (Convs) are high-pass filter, and (3) MSAs at the end of a stage significantly improve the accuracy. 
 
+Let's find the detailed answers below!
 
 
 ### I. What Properties of MSAs Do We Need to Improve Optimization?
@@ -20,7 +20,7 @@ Let's find the answer below!
 <img src="resources/vit/loss-landscape.png" style="width:90%;">
 </p>
 
-MSAs improve not only accuracy but also generalization by flattening the loss landscapes. ***Such improvement is primarily attributable to their data specificity, not long-range dependency*** 😱 Their weak inductive bias disrupts NN training. On the other hand, ViTs suffers from non-convex losses. MSAs allow negative Hessian eigenvalues in small data regimes. Large datasets and loss landscape smoothing methods alleviate this problem.
+MSAs improve not only accuracy but also generalization by flattening the loss landscapes. ***Such improvement is primarily attributable to their data specificity, NOT long-range dependency*** 😱 Their weak inductive bias disrupts NN training. On the other hand, ViTs suffers from non-convex losses. MSAs allow negative Hessian eigenvalues in small data regimes. Large datasets and loss landscape smoothing methods alleviate this problem.
 
 
 ### II. Do MSAs Act Like Convs?
@@ -104,6 +104,11 @@ We find that MSA complements Conv (not replaces Conv), and *MSA closer to the en
 In the animation above, we replace Convs of ResNet with MSAs one by one according to the build-up rules. Note that several MSAs in `c3` harm the accuracy, but the MSA at the end of `c2` improves it. As a result, surprisingly, the model with MSAs following the appropriate build-up rule outperforms CNNs even in the small data regime, e.g., CIFAR!
 
 
+
+
+## Caution: Investigate Loss Landscapes and Hessians With l2 Regularization on Augmented Datasets
+
+Two common mistakes ⚠️ are investigating loss landscapes and Hessians (1) *'without considering l2 regularization'* on (2) *'clean datasets'*. However, note that NNs are optimized with l2 regularization on augmented datasets. Therefore, it is appropriate to visualize *'NLL + l2'* on *'augmented datasets'*. Measuring criteria without l2 on clean dataset would give incorrect (even opposite) results.
 
 
 
