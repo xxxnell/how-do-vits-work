@@ -10,6 +10,7 @@ dataset:
   - 0.2675
   - 0.2565
   - 0.2761
+  padding: 4
 train:
   warmup_epochs: 1
   epochs: 200
