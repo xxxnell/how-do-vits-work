@@ -2,16 +2,25 @@
 
 # How Do Vision Transformers Work?
 
-This repository provides a PyTorch implementation of "How Do Vision Transformers Work?" In the paper, we show that multi-head self-attentions (MSAs) for computer vision is ***NOT for capturing long-range dependency***. 
+This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://openreview.net/forum?id=D78Go4hVcxO) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision is ***NOT due to its weak inductive bias and capturing long-range dependency***. 
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
 
-1. *What properties of MSAs do we need to better optimize NNs?* Do the long-range dependencies of MSAs help NNs learn?
-2. *Do MSAs act like Convs?* If not, how are they different?
-3. *How can we harmonize MSAs with Convs?* Can we just leverage their advantages?
+***Q1. What properties of MSAs do we need to better optimize NNs?***  
 
-We demonstrate that (1) MSAs flatten the loss landscapes, (2) MSA and Convs are complementary because MSAs are low-pass filters and convolutions (Convs) are high-pass filters, and (3) MSAs at the end of a stage significantly improve the accuracy. 
+A1. MSAs have their pros and cons. MSAs improve NNs by flattening the loss landscapes. A key feature is their data specificity, not long-range dependency. On the other hand, ViTs suffers from non-convex losses.
 
-Let's find the detailed answers below!
+
+***Q2. Do MSAs act like Convs?***  
+
+A2. MSAs and Convs exhibit opposite behaviors—e.g., MSAs are low-pass filters, but Convs are high-pass filters. It suggests that MSAs are shape-biased, whereas Convs are texture-biased. Therefore, MSAs and Convs are complementary.
+
+
+***Q3. How can we harmonize MSAs with Convs?***  
+
+A3. MSAs at the end of a stage (not a model) significantly improve the accuracy. Based on this, we introduce *AlterNet* by replacing Convs at the end of a stage with MSAs. AlterNet outperforms CNNs not only in large data regimes but also in small data regimes.
+
+
+👇 Let's find the detailed answers below!
 
 
 ### I. What Properties of MSAs Do We Need to Improve Optimization?
@@ -20,7 +29,7 @@ Let's find the detailed answers below!
 <img src="resources/vit/loss-landscape.png" style="width:90%;">
 </p>
 
-MSAs improve not only accuracy but also generalization by flattening the loss landscapes. ***Such improvement is primarily attributable to their data specificity, NOT long-range dependency*** 😱 On the other hand, ViTs suffers from non-convex losses. Their weak inductive bias and long-range dependency allow negative Hessian eigenvalues in small data regimes, and these non-convex points disrupt NN training. Large datasets and loss landscape smoothing methods alleviate this problem.
+MSAs improve not only accuracy but also generalization by flattening the loss landscapes. ***Such improvement is primarily attributable to their data specificity, NOT long-range dependency*** 😱 On the other hand, ViTs suffers from non-convex losses. Their weak inductive bias and long-range dependency produce negative Hessian eigenvalues in small data regimes, and these non-convex points disrupt NN training. Large datasets and loss landscape smoothing methods alleviate this problem.
 
 
 ### II. Do MSAs Act Like Convs?
@@ -46,11 +55,11 @@ Multi-stage neural networks behave like a series connection of small individual 
 <img src="resources/vit/alternet.png" style="width:90%;">
 </p>
 
-Based on these design rules, we introduce AlterNet by replacing Conv blocks at the end of a stage with MSA blocks. ***Surprisingly, AlterNet outperforms CNNs not only in large data regimes but also in small data regimes.*** This contrasts with canonical ViTs, models that perform poorly on small amounts of data. For more details, see below (["How to Apply MSA to Your Own Model"](#how-to-apply-msa-to-your-own-model)).
+Based on these design rules, we introduce AlterNet by replacing Conv blocks at the end of a stage with MSA blocks. ***Surprisingly, AlterNet outperforms CNNs not only in large data regimes but also in small data regimes.*** This contrasts with canonical ViTs, models that perform poorly on small amounts of data. For more details, see below (["How to Apply MSA to Your Own Model"](#how-to-apply-msa-to-your-own-model) section).
 
 
 
-This repository is based on [the official implementation of "Blurs Make Results Clearer: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness"](https://github.com/xxxnell/spatial-smoothing).  In this paper, we show that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by ensembling spatially nearby feature maps of CNNs. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
+This repository is based on [the official implementation of "Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness"](https://github.com/xxxnell/spatial-smoothing).  In this paper, we show that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by ensembling spatially nearby feature maps of CNNs. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
 
 
 
@@ -116,8 +125,14 @@ Two common mistakes ⚠️ are investigating loss landscapes and Hessians (1) *'
 
 If you find this useful, please consider citing 📑 the paper and starring 🌟 this repository. Please do not hesitate to contact Namuk Park (email: namuk.park at gmail dot com, twitter: [xxxnell](https://twitter.com/xxxnell)) with any comments or feedback.
 
-BibTex is TBD.
-
+```
+@inproceedings{park2022how,
+  title={How Do Vision Transformers Work?},
+  author={Namuk Park and Songkuk Kim},
+  booktitle={International Conference on Learning Representations},
+  year={2022}
+}
+```
 
 
 ## License
