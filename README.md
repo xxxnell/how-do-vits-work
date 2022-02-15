@@ -2,7 +2,7 @@
 
 # How Do Vision Transformers Work?
 
-This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://openreview.net/forum?id=D78Go4hVcxO) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision is ***NOT due to its weak inductive bias and capturing long-range dependency***. 
+This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://openreview.net/forum?id=D78Go4hVcxO) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision is ***NOT due to their weak inductive bias and capturing long-range dependency***. 
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
 
 ***Q1. What properties of MSAs do we need to better optimize NNs?***  
