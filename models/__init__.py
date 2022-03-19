@@ -1,6 +1,8 @@
 import os
 import time
+import requests
 from pathlib import Path
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -23,7 +25,7 @@ import ops.meters as meters
 
 def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     # AlexNet
-    if name in ["alexnet_dnn"]:
+    if name in ["alexnet_dnn", "alexnet"]:
         model = alexnet.dnn(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["alexnet_mcdo"]:
         model = alexnet.mcdo(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -32,7 +34,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["alexnet_mcdo_smoothing"]:
         model = alexnet.mcdo_smooth(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # VGG
-    elif name in ["vgg_dnn_11"]:
+    elif name in ["vgg_dnn_11", "vgg_11"]:
         model = vgg.dnn_11(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_11"]:
         model = vgg.mcdo_11(num_classes=num_classes, name=name, **block_kwargs)
@@ -40,7 +42,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = vgg.dnn_smooth_11(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_smoothing_11"]:
         model = vgg.mcdo_smooth_11(num_classes=num_classes, name=name, **block_kwargs)
-    elif name in ["vgg_dnn_13"]:
+    elif name in ["vgg_dnn_13", "vgg_13"]:
         model = vgg.dnn_13(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_13"]:
         model = vgg.mcdo_13(num_classes=num_classes, name=name, **block_kwargs)
@@ -48,7 +50,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = vgg.dnn_smooth_13(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_smoothing_13"]:
         model = vgg.mcdo_smooth_13(num_classes=num_classes, name=name, **block_kwargs)
-    elif name in ["vgg_dnn_16"]:
+    elif name in ["vgg_dnn_16", "vgg_16"]:
         model = vgg.dnn_16(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_16"]:
         model = vgg.mcdo_16(num_classes=num_classes, name=name, **block_kwargs)
@@ -56,7 +58,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = vgg.dnn_smooth_16(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_smoothing_16"]:
         model = vgg.mcdo_smooth_16(num_classes=num_classes, name=name, **block_kwargs)
-    elif name in ["vgg_dnn_19"]:
+    elif name in ["vgg_dnn_19", "vgg_19"]:
         model = vgg.dnn_19(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["vgg_mcdo_19"]:
         model = vgg.mcdo_19(num_classes=num_classes, name=name, **block_kwargs)
@@ -65,7 +67,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["vgg_mcdo_smoothing_19"]:
         model = vgg.mcdo_smooth_19(num_classes=num_classes, name=name, **block_kwargs)
     # PreAct VGG
-    elif name in ["prevgg_dnn_11"]:
+    elif name in ["prevgg_dnn_11", "prevgg_11"]:
         model = prevgg.dnn_11(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["prevgg_mcdo_11"]:
         model = prevgg.mcdo_11(num_classes=num_classes, name=name, **block_kwargs)
@@ -73,7 +75,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = prevgg.dnn_smooth_11(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["prevgg_mcdo_smoothing_11"]:
         model = prevgg.mcdo_smooth_11(num_classes=num_classes, name=name, **block_kwargs)
-    elif name in ["prevgg_dnn_13"]:
+    elif name in ["prevgg_dnn_13", "prevgg_13"]:
         model = prevgg.dnn_13(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["prevgg_mcdo_13"]:
         model = prevgg.mcdo_13(num_classes=num_classes, name=name, **block_kwargs)
@@ -81,7 +83,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = prevgg.dnn_smooth_13(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["prevgg_mcdo_smoothing_13"]:
         model = prevgg.mcdo_smooth_13(num_classes=num_classes, name=name, **block_kwargs)
-    elif name in ["prevgg_dnn_16"]:
+    elif name in ["prevgg_dnn_16", "prevgg_16"]:
         model = prevgg.dnn_16(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["prevgg_mcdo_16"]:
         model = prevgg.mcdo_16(num_classes=num_classes, name=name, **block_kwargs)
@@ -89,7 +91,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = prevgg.dnn_smooth_16(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["prevgg_mcdo_smoothing_16"]:
         model = prevgg.mcdo_smooth_16(num_classes=num_classes, name=name, **block_kwargs)
-    elif name in ["prevgg_dnn_19"]:
+    elif name in ["prevgg_dnn_19", "prevgg_19"]:
         model = prevgg.dnn_19(num_classes=num_classes, name=name, **block_kwargs)
     elif name in ["prevgg_mcdo_19"]:
         model = prevgg.mcdo_19(num_classes=num_classes, name=name, **block_kwargs)
@@ -98,7 +100,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["prevgg_mcdo_smoothing_19"]:
         model = prevgg.mcdo_smooth_19(num_classes=num_classes, name=name, **block_kwargs)
     # ResNet
-    elif name in ["resnet_dnn_18"]:
+    elif name in ["resnet_dnn_18", "resnet_18"]:
         model = resnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_18"]:
         model = resnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -106,7 +108,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = resnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_18"]:
         model = resnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["resnet_dnn_34"]:
+    elif name in ["resnet_dnn_34", "resnet_34"]:
         model = resnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_34"]:
         model = resnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -114,7 +116,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = resnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_34"]:
         model = resnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["resnet_dnn_50"]:
+    elif name in ["resnet_dnn_50", "resnet_50"]:
         model = resnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_50"]:
         model = resnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -122,7 +124,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = resnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_50"]:
         model = resnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["resnet_dnn_101"]:
+    elif name in ["resnet_dnn_101", "resnet_101"]:
         model = resnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_101"]:
         model = resnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -130,7 +132,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = resnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_smoothing_101"]:
         model = resnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["resnet_dnn_152"]:
+    elif name in ["resnet_dnn_152", "resnet_152"]:
         model = resnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnet_mcdo_152"]:
         model = resnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -139,7 +141,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["resnet_mcdo_smoothing_152"]:
         model = resnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # PreAct ResNet
-    elif name in ["preresnet_dnn_18"]:
+    elif name in ["preresnet_dnn_18", "preresnet_18"]:
         model = preresnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_18"]:
         model = preresnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -147,7 +149,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = preresnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_18"]:
         model = preresnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["preresnet_dnn_34"]:
+    elif name in ["preresnet_dnn_34", "preresnet_34"]:
         model = preresnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_34"]:
         model = preresnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -155,7 +157,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = preresnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_34"]:
         model = preresnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["preresnet_dnn_50"]:
+    elif name in ["preresnet_dnn_50", "preresnet_50"]:
         model = preresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_50"]:
         model = preresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -163,7 +165,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = preresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_50"]:
         model = preresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["preresnet_dnn_101"]:
+    elif name in ["preresnet_dnn_101", "preresnet_101"]:
         model = preresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_101"]:
         model = preresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -171,7 +173,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = preresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_smoothing_101"]:
         model = preresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["preresnet_dnn_152"]:
+    elif name in ["preresnet_dnn_152", "preresnet_152"]:
         model = preresnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["preresnet_mcdo_152"]:
         model = preresnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -180,7 +182,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["preresnet_mcdo_smoothing_152"]:
         model = preresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # ResNeXt
-    elif name in ["resnext_dnn_50"]:
+    elif name in ["resnext_dnn_50", "resnext_50"]:
         model = resnext.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_mcdo_50"]:
         model = resnext.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -188,7 +190,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = resnext.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_mcdo_smoothing_50"]:
         model = resnext.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["resnext_dnn_101"]:
+    elif name in ["resnext_dnn_101", "resnext_101"]:
         model = resnext.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["resnext_mcdo_101"]:
         model = resnext.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -197,7 +199,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["resnext_mcdo_smoothing_101"]:
         model = resnext.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # Wide ResNet
-    elif name in ["wideresnet_dnn_50"]:
+    elif name in ["wideresnet_dnn_50", "wideresnet_50"]:
         model = wideresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_50"]:
         model = wideresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -205,7 +207,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = wideresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_smoothing_50"]:
         model = wideresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["wideresnet_dnn_101"]:
+    elif name in ["wideresnet_dnn_101", "wideresnet_101"]:
         model = wideresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["wideresnet_mcdo_101"]:
         model = wideresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -214,7 +216,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["wideresnet_mcdo_smoothing_101"]:
         model = wideresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # SE ResNet
-    elif name in ["seresnet_dnn_18"]:
+    elif name in ["seresnet_dnn_18", "seresnet_18"]:
         model = seresnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_18"]:
         model = seresnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -222,7 +224,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = seresnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_smoothing_18"]:
         model = seresnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["seresnet_dnn_34"]:
+    elif name in ["seresnet_dnn_34", "seresnet_34"]:
         model = seresnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_34"]:
         model = seresnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -230,7 +232,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = seresnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_smoothing_34"]:
         model = seresnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["seresnet_dnn_50"]:
+    elif name in ["seresnet_dnn_50", "seresnet_50"]:
         model = seresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_50"]:
         model = seresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -238,7 +240,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = seresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_smoothing_50"]:
         model = seresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["seresnet_dnn_101"]:
+    elif name in ["seresnet_dnn_101", "seresnet_101"]:
         model = seresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_101"]:
         model = seresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -246,7 +248,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = seresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_smoothing_101"]:
         model = seresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["seresnet_dnn_152"]:
+    elif name in ["seresnet_dnn_152", "seresnet_152"]:
         model = seresnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["seresnet_mcdo_152"]:
         model = seresnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -255,7 +257,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
     elif name in ["seresnet_mcdo_smoothing_152"]:
         model = seresnet.mcdo_smooth_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     # CBAM ResNet
-    elif name in ["cbamresnet_dnn_18"]:
+    elif name in ["cbamresnet_dnn_18", "cbamresnet_18"]:
         model = cbamresnet.dnn_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_18"]:
         model = cbamresnet.mcdo_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -263,7 +265,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = cbamresnet.dnn_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_smoothing_18"]:
         model = cbamresnet.mcdo_smooth_18(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["cbamresnet_dnn_34"]:
+    elif name in ["cbamresnet_dnn_34", "cbamresnet_34"]:
         model = cbamresnet.dnn_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_34"]:
         model = cbamresnet.mcdo_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -271,7 +273,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = cbamresnet.dnn_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_smoothing_34"]:
         model = cbamresnet.mcdo_smooth_34(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["cbamresnet_dnn_50"]:
+    elif name in ["cbamresnet_dnn_50", "cbamresnet_50"]:
         model = cbamresnet.dnn_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_50"]:
         model = cbamresnet.mcdo_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -279,7 +281,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = cbamresnet.dnn_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_smoothing_50"]:
         model = cbamresnet.mcdo_smooth_50(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["cbamresnet_dnn_101"]:
+    elif name in ["cbamresnet_dnn_101", "cbamresnet_101"]:
         model = cbamresnet.dnn_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_101"]:
         model = cbamresnet.mcdo_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -287,7 +289,7 @@ def get_model(name, num_classes=10, stem=False, verbose=True, **block_kwargs):
         model = cbamresnet.dnn_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_smoothing_101"]:
         model = cbamresnet.mcdo_smooth_101(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
-    elif name in ["cbamresnet_dnn_152"]:
+    elif name in ["cbamresnet_dnn_152", "cbamresnet_152"]:
         model = cbamresnet.dnn_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
     elif name in ["cbamresnet_mcdo_152"]:
         model = cbamresnet.mcdo_152(num_classes=num_classes, stem=stem, name=name, **block_kwargs)
@@ -416,3 +418,26 @@ def measure_executive_time(model, size=(1, 3, 32, 32), n=1000, gpu=True):
         meter.update(time.time() - t)
 
     return meter.avg
+
+
+def download(url, path, force=False):
+    # This snibbet is based on https://stackoverflow.com/a/37573701
+    
+    if not force and os.path.exists(path):
+        return
+    
+    # make dir
+    root_path = "/".join(path.split("/")[:-1])
+    if root_path != "":
+        os.makedirs(root_path, exist_ok=True)
+    
+    # get url
+    response = requests.get(url, stream=True)
+    total_size_in_bytes= int(response.headers.get('content-length', 0))
+    block_size = 1024
+    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
+    with open(path, 'wb') as file:
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            file.write(data)
+    progress_bar.close()
