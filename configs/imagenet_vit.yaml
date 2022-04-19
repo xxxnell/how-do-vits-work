@@ -1,3 +1,7 @@
+---
+# This configuration is for training with strong data augmentation,
+# which was mostly used in the paper.
+# This configuration was used for both CNNs and ViTs.
 dataset:
   name: imagenet
   root: ../data
@@ -21,7 +25,7 @@ train:
   smoothing: 0.1
   mixup:
     num_classes: 1000
-    mixup_alpha: 1.0 
+    mixup_alpha: 1.0
     cutmix_alpha: 0.8
     prob: 1.0
 val:

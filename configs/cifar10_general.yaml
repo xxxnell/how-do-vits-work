@@ -1,4 +1,6 @@
 ---
+# This configuration is for training with weak data augmentation,
+# which was rarely used in the paper.
 dataset:
   name: cifar10
   root: "../data"

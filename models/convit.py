@@ -1,7 +1,9 @@
 """
-This ConViT is ViT with two-dimensional convolutional MSA, NOT [1]!
+This ConViT is ViT with two-dimensional convolutional MSA (cf. [1]), NOT [2]!
 
-[1] d'Ascoli, Stéphane, et al. "Convit: Improving vision transformers with soft convolutional inductive biases."
+[1] Baosong Yang, Longyue Wang, Derek F Wong, Lidia S Chao, and Zhaopeng Tu. "Convolutional self-attention 
+networks". NAACL, 2019.
+[2] d'Ascoli, Stéphane, et al. "Convit: Improving vision transformers with soft convolutional inductive biases."
 arXiv preprint arXiv:2103.10697 (2021).
 """
 from functools import partial

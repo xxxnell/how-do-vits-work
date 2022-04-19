@@ -55,6 +55,8 @@ class LocalAttention(nn.Module):
 # Attention Blocks
 
 class AttentionBlockA(nn.Module):
+    # Attention block with post-activation.
+    # This block is for ablation study, and we do NOT use this block by default.
     expansion = 4
 
     def __init__(self, dim_in, dim_out=None, *,
@@ -97,6 +99,7 @@ class AttentionBasicBlockA(AttentionBlockA):
 
 class AttentionBlockB(nn.Module):
     # Attention block with pre-activation.
+    # We use this block by default.
     expansion = 4
 
     def __init__(self, dim_in, dim_out=None, *,
@@ -147,6 +150,7 @@ class AttentionBasicBlockB(AttentionBlockB):
 
 class StemA(nn.Module):
     # Typical Stem stage for CNNs, e.g. ResNet or ResNeXt.
+    # This block is for ablation study, and we do NOT use this block by default.
 
     def __init__(self, dim_in, dim_out, pool=True):
         super().__init__()
@@ -169,8 +173,8 @@ class StemA(nn.Module):
 
 
 class StemB(nn.Module):
-    # Stem stage for pre-activation pattern
-    # based on pre-activation ResNet.
+    # Stem stage for pre-activation pattern based on pre-activation ResNet.
+    # We use this block by default.
 
     def __init__(self, dim_in, dim_out, pool=True):
         super().__init__()
@@ -195,7 +199,7 @@ class AlterNet(nn.Module):
     def __init__(self, block1, block2, *,
                  num_blocks, num_blocks2, heads,
                  cblock=classifier.BNGAPBlock,
-                 sd=0.0, num_classes=10, stem=StemB, name="cavit", **block_kwargs):
+                 sd=0.0, num_classes=10, stem=StemB, name="alternet", **block_kwargs):
         super().__init__()
         self.name = name
         idxs = [[j for j in range(sum(num_blocks[:i]), sum(num_blocks[:i + 1]))] for i in range(len(num_blocks))]
@@ -231,7 +235,7 @@ class AlterNet(nn.Module):
             channels = out_channels * block.expansion
 
         return nn.Sequential(*seq)
-    
+
     def forward(self, x):
         x = self.layer0(x)
         x = self.layer1(x)
