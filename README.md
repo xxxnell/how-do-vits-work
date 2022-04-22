@@ -2,6 +2,8 @@
 
 # How Do Vision Transformers Work?
 
+[[paper](https://openreview.net/forum?id=D78Go4hVcxO), [arxiv](https://arxiv.org/abs/2202.06709), [poster](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_poster_iclr2022.pdf), [slide](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_talk.pdf)]
+
 This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://openreview.net/forum?id=D78Go4hVcxO) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision is ***NOT due to their weak inductive bias and capturing long-range dependency***. 
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
 
@@ -55,7 +57,7 @@ Multi-stage neural networks behave like a series connection of small individual 
 <img src="resources/vit/alternet.png" style="width:90%;">
 </p>
 
-Based on these design rules, we introduce AlterNet by replacing Conv blocks at the end of a stage with MSA blocks. ***Surprisingly, AlterNet outperforms CNNs not only in large data regimes but also in small data regimes***, e.g., CIFAR. This contrasts with canonical ViTs, models that perform poorly on small amounts of data. For more details, see below (["How to Apply MSA to Your Own Model"](#how-to-apply-msa-to-your-own-model) section).
+Based on these design rules, we introduce AlterNet ([code](https://github.com/xxxnell/how-do-vits-work/blob/transformer/models/alternet.py)) by replacing Conv blocks at the end of a stage with MSA blocks. ***Surprisingly, AlterNet outperforms CNNs not only in large data regimes but also in small data regimes***, e.g., CIFAR. This contrasts with canonical ViTs, models that perform poorly on small amounts of data. For more details, see below (["How to Apply MSA to Your Own Model"](#how-to-apply-msa-to-your-own-model) section).
 
 
 
@@ -94,9 +96,10 @@ See [```classification.ipynb```](classification.ipynb) ([Colab notebook](https:/
 <summary>
   Four pretrained models for CIFAR-100 are also provided: <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/resnet_50_cifar100_691cc9a9e4.pth.tar">ResNet-50</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/vit_ti_cifar100_9857b21357.pth.tar">ViT-Ti</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/pit_ti_cifar100_0645889efb.pth.tar">PiT-Ti</a>, and <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/swin_ti_cifar100_ec2894492b.pth.tar">Swin-Ti</a>. We recommend using <a href="https://github.com/rwightman/pytorch-image-models">timm</a> for ImageNet-1K (e.g., please refer to <code><a href="https://github.com/xxxnell/how-do-vits-work/blob/transformer/fourier_analysis.ipynb">fourier_analysis.ipynb</a></code>).
   </summary>
-
+<br/>
 The codes below are snippets for (a) loading pretrained models and (b) converting them into block sequences.
-  
+  <br/>
+
 ```python
 # ResNet-50
 import models
@@ -308,6 +311,7 @@ blocks = [
 
 ```python
 # Swin-Ti
+import copy
 import timm
 import models
 
