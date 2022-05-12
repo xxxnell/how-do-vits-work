@@ -28,16 +28,16 @@ A3. MSAs at the end of a stage (not a model) significantly improve the accuracy.
 ### I. What Properties of MSAs Do We Need to Improve Optimization?
 
 <p align="center">
-<img src="resources/vit/loss-landscape.png" style="width:90%;">
+<img src="resources/vit/loss-landscape.png" style="width:75%;">
 </p>
 
-MSAs improve not only accuracy but also generalization by flattening the loss landscapes. ***Such improvement is primarily attributable to their data specificity, NOT long-range dependency*** 😱 On the other hand, ViTs suffers from non-convex losses. Their weak inductive bias and long-range dependency produce negative Hessian eigenvalues in small data regimes, and these non-convex points disrupt NN training. Large datasets and loss landscape smoothing methods alleviate this problem.
+MSAs improve not only accuracy but also generalization by flattening the loss landscapes (reducing the magnitude of Hessian eigenvalues). ***Such improvement is primarily attributable to their data specificity, NOT long-range dependency*** 😱 On the other hand, ViTs suffers from non-convex losses (negative Hessian eigenvalues). Their weak inductive bias and long-range dependency produce negative Hessian eigenvalues in small data regimes, and these non-convex points disrupt NN training. Large datasets and loss landscape smoothing methods alleviate this problem.
 
 
 ### II. Do MSAs Act Like Convs?
 
 <p align="center">
-<img src="resources/vit/fourier.png" style="width:90%;">
+<img src="resources/vit/fourier.png" style="width:75%;">
 </p>
 
 MSAs and Convs exhibit opposite behaviors. Therefore, MSAs and Convs are complementary. For example, MSAs are low-pass filters, but Convs are high-pass filters. Likewise, Convs are vulnerable to high-frequency noise but that MSAs are vulnerable to low-frequency noise: it suggests that MSAs are shape-biased, whereas Convs are texture-biased. In addition, Convs transform feature maps and MSAs aggregate transformed feature map predictions. Thus, it is effective to place MSAs after Convs.
@@ -46,20 +46,16 @@ MSAs and Convs exhibit opposite behaviors. Therefore, MSAs and Convs are complem
 ### III. How Can We Harmonize MSAs With Convs?
 
 <p align="center">
-<img src="resources/vit/architecture.png" style="width:90%;">
+<img src="resources/vit/architecture.png" style="width:75%;">
 </p>
 
-Multi-stage neural networks behave like a series connection of small individual models. In addition, MSAs at the end of a stage (not the end of a model) play a key role in prediction. Based on these insights, we propose design rules to harmonize MSAs with Convs. NN stages using this design pattern consists of a number of CNN blocks and one (or a few) MSA block. The design pattern naturally derives the structure of the canonical Transformer, which has one MLP block for one MSA block.
-
-<br />
-
-<p align="center">
-<img src="resources/vit/alternet.png" style="width:90%;">
-</p>
+Multi-stage neural networks behave like a series connection of small individual models. In addition, MSAs at the end of a stage (not the end of a model) play a key role in prediction. Considering these insights, we propose design rules to harmonize MSAs with Convs. NN stages using this design pattern consists of a number of CNN blocks and one (or a few) MSA block. The design pattern naturally derives the structure of the canonical Transformer, which has one MLP block for one MSA block.
 
 Based on these design rules, we introduce AlterNet ([code](https://github.com/xxxnell/how-do-vits-work/blob/transformer/models/alternet.py)) by replacing Conv blocks at the end of a stage with MSA blocks. ***Surprisingly, AlterNet outperforms CNNs not only in large data regimes but also in small data regimes***, e.g., CIFAR. This contrasts with canonical ViTs, models that perform poorly on small amounts of data. For more details, see below (["How to Apply MSA to Your Own Model"](#how-to-apply-msa-to-your-own-model) section).
 
-
+<p align="center">
+<img src="resources/vit/summary.png" style="width:65%;">
+</p>
 
 This repository is based on [the official implementation of "Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness"](https://github.com/xxxnell/spatial-smoothing).  In this paper, we show that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by ensembling spatially nearby feature maps of CNNs. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
 
@@ -94,7 +90,7 @@ See [```classification.ipynb```](classification.ipynb) ([Colab notebook](https:/
 
 <details>
 <summary>
-  Four pretrained models for CIFAR-100 are also provided: <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/resnet_50_cifar100_691cc9a9e4.pth.tar">ResNet-50</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/vit_ti_cifar100_9857b21357.pth.tar">ViT-Ti</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/pit_ti_cifar100_0645889efb.pth.tar">PiT-Ti</a>, and <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/swin_ti_cifar100_ec2894492b.pth.tar">Swin-Ti</a>. We recommend using <a href="https://github.com/rwightman/pytorch-image-models">timm</a> for ImageNet-1K (e.g., please refer to <code><a href="https://github.com/xxxnell/how-do-vits-work/blob/transformer/fourier_analysis.ipynb">fourier_analysis.ipynb</a></code>).
+  Pretrained models for CIFAR-100 are also provided: <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/resnet_50_cifar100_691cc9a9e4.pth.tar">ResNet-50</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/vit_ti_cifar100_9857b21357.pth.tar">ViT-Ti</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/pit_ti_cifar100_0645889efb.pth.tar">PiT-Ti</a>, and <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/swin_ti_cifar100_ec2894492b.pth.tar">Swin-Ti</a>. We recommend using <a href="https://github.com/rwightman/pytorch-image-models">timm</a> for ImageNet-1K (e.g., please refer to <code><a href="https://github.com/xxxnell/how-do-vits-work/blob/transformer/fourier_analysis.ipynb">fourier_analysis.ipynb</a></code>).
   </summary>
 <br/>
 The codes below are snippets for (a) loading pretrained models and (b) converting them into block sequences.
@@ -400,7 +396,7 @@ blocks = [
 
 ## Visualizing the Loss Landscapes
 
-Refer to [```losslandscape.ipynb```](losslandscape.ipynb) ([Colab notebook](https://colab.research.google.com/github/xxxnell/how-do-vits-work/blob/transformer/losslandscape.ipynb)) for exploring the loss landscapes. Run all cells to get predictive performance of the model for weight space grid. We provide [a sample loss landscape result](resources/results/cifar100_vit_ti_losslandscape.csv). Loss landscape visualization shows that ViT has a flatter loss than ResNet.
+Refer to [```losslandscape.ipynb```](losslandscape.ipynb) ([Colab notebook](https://colab.research.google.com/github/xxxnell/how-do-vits-work/blob/transformer/losslandscape.ipynb)) or [the original repo](https://github.com/tomgoldstein/loss-landscape) for exploring the loss landscapes. Run all cells to get predictive performance of the model for weight space grid. Loss landscape visualization shows that ViT has a flatter loss than ResNet.
 
 
 ## Fourier Analysis of Representations 
@@ -415,7 +411,7 @@ Refer to [```featuremap_variance.ipynb```](featuremap_variance.ipynb) ([Colab no
 
 ## Evaluating Robustness on Corrupted Datasets
 
-Refer to [```robustness.ipynb```](robustness.ipynb) ([Colab notebook](https://colab.research.google.com/github/xxxnell/how-do-vits-work/blob/transformer/robustness.ipynb)) for evaluation corruption robustness on [corrupted datasets](https://github.com/hendrycks/robustness) such as CIFAR-10-C and CIFAR-100-C. Run all cells to get predictive performance of the model on datasets which consist of data corrupted by 15 different types with 5 levels of intensity each. We provide [a sample robustness result](resources/results/imagenet_alexnet_dnn_corrupted.csv). 
+Refer to [```robustness.ipynb```](robustness.ipynb) ([Colab notebook](https://colab.research.google.com/github/xxxnell/how-do-vits-work/blob/transformer/robustness.ipynb)) for evaluation corruption robustness on [corrupted datasets](https://github.com/hendrycks/robustness) such as CIFAR-10-C and CIFAR-100-C. Run all cells to get predictive performance of the model on datasets which consist of data corrupted by 15 different types with 5 levels of intensity each. 
 
 
 ## How to Apply MSA to Your Own Model
@@ -435,9 +431,9 @@ In the animation above, we replace Convs of ResNet with MSAs one by one accordin
 
 
 
-## Caution: Investigate Loss Landscapes and Hessians With L2 Regularization on Augmented Datasets
+## Investigate Loss Landscapes and Hessians With L2 Regularization on Augmented Datasets
 
-Two common mistakes ⚠️ are investigating loss landscapes and Hessians (1) *'without considering L2 regularization'* on (2) *'clean datasets'*. However, note that NNs are optimized with L2 regularization on augmented datasets. Therefore, it is appropriate to visualize *'NLL + L2'* on *'augmented datasets'*. Measuring criteria without L2 on clean datasets would give incorrect (even opposite) results.
+Two common mistakes are investigating loss landscapes and Hessians (1) *'without considering L2 regularization'* on (2) *'clean datasets'*. However, note that NNs are optimized with L2 regularization on augmented datasets. Therefore, it is appropriate to visualize *'NLL + L2'* on *'augmented datasets'*. Measuring criteria without L2 on clean datasets would give incorrect results.
 
 
 
