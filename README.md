@@ -4,7 +4,7 @@
 
 [[paper](https://openreview.net/forum?id=D78Go4hVcxO), [arxiv](https://arxiv.org/abs/2202.06709), [poster](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_poster_iclr2022.pdf), [slide](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_talk.pdf)]
 
-This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://openreview.net/forum?id=D78Go4hVcxO) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision is ***NOT due to their weak inductive bias and capturing long-range dependency***. 
+This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://openreview.net/forum?id=D78Go4hVcxO) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision is ***NOT due to their weak inductive bias and capturing long-range dependency***. MSAs are not merely generalized Convs, but rather generalized spatial smoothings that *complement* Convs.
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
 
 ***Q1. What properties of MSAs do we need to better optimize NNs?***  
@@ -28,7 +28,7 @@ A3. MSAs at the end of a stage (not a model) significantly improve the accuracy.
 ### I. What Properties of MSAs Do We Need to Improve Optimization?
 
 <p align="center">
-<img src="resources/vit/loss-landscape.png" style="width:75%;">
+<img src="resources/vit/loss-landscape.png" style="width:83%;">
 </p>
 
 MSAs improve not only accuracy but also generalization by flattening the loss landscapes (reducing the magnitude of Hessian eigenvalues). ***Such improvement is primarily attributable to their data specificity, NOT long-range dependency*** 😱 On the other hand, ViTs suffers from non-convex losses (negative Hessian eigenvalues). Their weak inductive bias and long-range dependency produce negative Hessian eigenvalues in small data regimes, and these non-convex points disrupt NN training. Large datasets and loss landscape smoothing methods alleviate this problem.
@@ -37,7 +37,7 @@ MSAs improve not only accuracy but also generalization by flattening the loss la
 ### II. Do MSAs Act Like Convs?
 
 <p align="center">
-<img src="resources/vit/fourier.png" style="width:75%;">
+<img src="resources/vit/fourier.png" style="width:83%;">
 </p>
 
 MSAs and Convs exhibit opposite behaviors. Therefore, MSAs and Convs are complementary. For example, MSAs are low-pass filters, but Convs are high-pass filters. Likewise, Convs are vulnerable to high-frequency noise but that MSAs are vulnerable to low-frequency noise: it suggests that MSAs are shape-biased, whereas Convs are texture-biased. In addition, Convs transform feature maps and MSAs aggregate transformed feature map predictions. Thus, it is effective to place MSAs after Convs.
@@ -46,7 +46,7 @@ MSAs and Convs exhibit opposite behaviors. Therefore, MSAs and Convs are complem
 ### III. How Can We Harmonize MSAs With Convs?
 
 <p align="center">
-<img src="resources/vit/architecture.png" style="width:75%;">
+<img src="resources/vit/architecture.png" style="width:83%;">
 </p>
 
 Multi-stage neural networks behave like a series connection of small individual models. In addition, MSAs at the end of a stage (not the end of a model) play a key role in prediction. Considering these insights, we propose design rules to harmonize MSAs with Convs. NN stages using this design pattern consists of a number of CNN blocks and one (or a few) MSA block. The design pattern naturally derives the structure of the canonical Transformer, which has one MLP block for one MSA block.
@@ -54,10 +54,10 @@ Multi-stage neural networks behave like a series connection of small individual 
 Based on these design rules, we introduce AlterNet ([code](https://github.com/xxxnell/how-do-vits-work/blob/transformer/models/alternet.py)) by replacing Conv blocks at the end of a stage with MSA blocks. ***Surprisingly, AlterNet outperforms CNNs not only in large data regimes but also in small data regimes***, e.g., CIFAR. This contrasts with canonical ViTs, models that perform poorly on small amounts of data. For more details, see below (["How to Apply MSA to Your Own Model"](#how-to-apply-msa-to-your-own-model) section).
 
 <p align="center">
-<img src="resources/vit/summary.png" style="width:65%;">
+<img src="resources/vit/summary.png" style="width:70%;">
 </p>
 
-This repository is based on [the official implementation of "Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness"](https://github.com/xxxnell/spatial-smoothing).  In this paper, we show that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by ensembling spatially nearby feature maps of CNNs. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
+This repository is based on [the official implementation of "Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness (ICML 2022)"](https://github.com/xxxnell/spatial-smoothing). In this paper, we show that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by ensembling spatially nearby feature maps of CNNs and flattening loss landscapes. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
 
 
 
@@ -90,7 +90,7 @@ See [```classification.ipynb```](classification.ipynb) ([Colab notebook](https:/
 
 <details>
 <summary>
-  Pretrained models for CIFAR-100 are also provided: <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/resnet_50_cifar100_691cc9a9e4.pth.tar">ResNet-50</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/vit_ti_cifar100_9857b21357.pth.tar">ViT-Ti</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/pit_ti_cifar100_0645889efb.pth.tar">PiT-Ti</a>, and <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/swin_ti_cifar100_ec2894492b.pth.tar">Swin-Ti</a>. We recommend using <a href="https://github.com/rwightman/pytorch-image-models">timm</a> for ImageNet-1K (e.g., please refer to <code><a href="https://github.com/xxxnell/how-do-vits-work/blob/transformer/fourier_analysis.ipynb">fourier_analysis.ipynb</a></code>).
+  Pretrained models for CIFAR-100 are also provided: <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/resnet_50_cifar100_691cc9a9e4.pth.tar">ResNet-50</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/vit_ti_cifar100_9857b21357.pth.tar">ViT-Ti</a>, <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/pit_ti_cifar100_0645889efb.pth.tar">PiT-Ti</a>, and <a href="https://github.com/xxxnell/how-do-vits-work-storage/releases/download/v0.1/swin_ti_cifar100_ec2894492b.pth.tar">Swin-Ti</a>. We recommend using <a href="https://github.com/rwightman/pytorch-image-models">timm</a> for ImageNet-1K for the sake of simplicity (e.g., please refer to <code><a href="https://github.com/xxxnell/how-do-vits-work/blob/transformer/fourier_analysis.ipynb">fourier_analysis.ipynb</a></code>).
   </summary>
 <br/>
 The codes below are snippets for (a) loading pretrained models and (b) converting them into block sequences.
@@ -106,7 +106,7 @@ path = "checkpoints/resnet_50_cifar100_691cc9a9e4.pth.tar"
 models.download(url=url, path=path)
 
 name = "resnet_50"
-model = models.get_model(name, num_classes=num_classes,  # timm does not provide a ResNet for CIFAR
+model = models.get_model(name, num_classes=100,  # timm does not provide a ResNet for CIFAR
                          stem=model_args.get("stem", False))
 map_location = "cuda" if torch.cuda.is_available() else "cpu"
 checkpoint = torch.load(path, map_location=map_location)
@@ -137,7 +137,7 @@ path = "checkpoints/vit_ti_cifar100_9857b21357.pth.tar"
 models.download(url=url, path=path)
 
 model = timm.models.vision_transformer.VisionTransformer(
-    num_classes=num_classes, img_size=32, patch_size=2,  # for CIFAR
+    num_classes=100, img_size=32, patch_size=2,  # for CIFAR
     embed_dim=192, depth=12, num_heads=3, qkv_bias=False,  # for ViT-Ti 
 )
 model.name = "vit_ti"
@@ -160,7 +160,8 @@ class PatchEmbed(nn.Module):
         x = torch.cat((cls_token, x), dim=1)
         x = self.model.pos_drop(x + self.model.pos_embed)
         return x
-    
+
+
 class Residual(nn.Module):
     def __init__(self, *fn):
         super().__init__()
@@ -188,7 +189,7 @@ blocks = [
     PatchEmbed(model),
     *flatten([[Residual(b.norm1, b.attn), Residual(b.norm2, b.mlp)] 
               for b in model.blocks]),
-    nn.Sequential(Lambda(lambda x: x[:, 0]), model.norm, model.head),
+    nn.Sequential(model.norm, Lambda(lambda x: x[:, 0]), model.head),
 ]
 ```
 
@@ -208,7 +209,7 @@ path = "checkpoints/pit_ti_cifar100_0645889efb.pth.tar"
 models.download(url=url, path=path)
 
 model = timm.models.pit.PoolingVisionTransformer(
-    num_classes=num_classes, img_size=32, patch_size=2, stride=1,  # for CIFAR-100
+    num_classes=100, img_size=32, patch_size=2, stride=1,  # for CIFAR-100
     base_dims=[32, 32, 32], depth=[2, 6, 4], heads=[2, 4, 8], mlp_ratio=4,  # for PiT-Ti
 )
 model.name = "pit_ti"
@@ -268,12 +269,15 @@ class Pool(nn.Module):
     
     
 class Classifier(nn.Module):
-    def __init__(self, head):
+    def __init__(self, norm, head):
         super().__init__()
         self.head = copy.deepcopy(head)
+        self.norm = copy.deepcopy(norm)
         
     def forward(self, x, **kwargs):
-        x = self.head(x[:,0])
+        x = x[:,0]
+        x = self.norm(x)
+        x = self.head(x)
         return x
 
     
@@ -300,7 +304,7 @@ blocks = [
     nn.Sequential(Pool(model.transformers[1].pool, 1), Concat(model),),
     *flatten([[Residual(b.norm1, b.attn), Residual(b.norm2, b.mlp)] 
               for b in model.transformers[2].blocks]),
-    Classifier(model.head),
+    Classifier(model.norm, model.head),
 ]
 ```
 
@@ -320,7 +324,7 @@ path = "checkpoints/swin_ti_cifar100_ec2894492b.pth.tar"
 models.download(url=url, path=path)
 
 model = timm.models.swin_transformer.SwinTransformer(
-    num_classes=num_classes, img_size=32, patch_size=1, window_size=4,  # for CIFAR-100
+    num_classes=100, img_size=32, patch_size=1, window_size=4,  # for CIFAR-100
     embed_dim=96, depths=(2, 2, 6, 2), num_heads=(3, 6, 12, 24), qkv_bias=False,  # for Swin-Ti
 )
 model.name = "swin_ti"
@@ -362,14 +366,11 @@ class Classifier(nn.Module):
     def __init__(self, norm, head):
         super().__init__()
         self.norm = copy.deepcopy(norm)
-        self.avgpool = nn.AdaptiveAvgPool1d(1)
         self.head = copy.deepcopy(head)
         
     def forward(self, x, **kwargs):
         x = self.norm(x)
-        x = torch.transpose(x, 1, 2)
-        x = self.avgpool(x)
-        x = torch.flatten(x, 1)
+        x = x.mean(dim=1)
         x = self.head(x)
 
         return x
@@ -423,10 +424,10 @@ Refer to [```robustness.ipynb```](robustness.ipynb) ([Colab notebook](https://co
 We find that MSA complements Conv (not replaces Conv), and *MSA closer to the end of a stage* improves predictive performance significantly. Based on these insights, we propose the following build-up rules:
 
 1. Alternately replace Conv blocks with MSA blocks from the end of a baseline CNN model. 
-2. If the added MSA block does not improve predictive performance, replace a Conv block located at the end of an earlier stage with an MSA 
+2. If the added MSA block does not improve predictive performance, replace a Conv block located at the end of an earlier stage with an MSA. 
 3. Use more heads and higher hidden dimensions for MSA blocks in late stages.
 
-In the animation above, we replace Convs of ResNet with MSAs one by one according to the build-up rules. Note that several MSAs in `c3` harm the accuracy, but the MSA at the end of `c2` improves it. As a result, surprisingly, the model with MSAs following the appropriate build-up rule outperforms CNNs even in the small data regime, e.g., CIFAR!
+In the animation above, we replace Convs of ResNet with MSAs one by one according to the build-up rules. Note that several MSAs in `c3` harm the accuracy, but the MSA at the end of `c2` improves it. As a result, surprisingly, the model with MSAs following the appropriate build-up rule outperforms CNNs even in the small data regimes, e.g., CIFAR-100!
 
 
 
