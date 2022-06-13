@@ -2,9 +2,9 @@
 
 # How Do Vision Transformers Work?
 
-[[paper](https://openreview.net/forum?id=D78Go4hVcxO), [arxiv](https://arxiv.org/abs/2202.06709), [poster](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_poster_iclr2022.pdf), [slide](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_talk.pdf)]
+[[arxiv](https://arxiv.org/abs/2202.06709), [poster](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_poster_iclr2022.pdf), [slide](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_talk.pdf)]
 
-This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://openreview.net/forum?id=D78Go4hVcxO) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision is ***NOT due to their weak inductive bias and capturing long-range dependency***. MSAs are not merely generalized Convs, but rather generalized spatial smoothings that *complement* Convs.
+This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://arxiv.org/abs/2202.06709) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision lies in the “spatial smoothing” of feature maps, ***NOT in their weak inductive bias and the capturing of long-range dependencies***. MSAs are not merely generalized Convs, but rather generalized spatial smoothings that *complement* Convs.
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
 
 ***Q1. What properties of MSAs do we need to better optimize NNs?***  
@@ -57,7 +57,7 @@ Based on these design rules, we introduce AlterNet ([code](https://github.com/xx
 <img src="resources/vit/summary.png" style="width:70%;">
 </p>
 
-This repository is based on [the official implementation of "Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness (ICML 2022)"](https://github.com/xxxnell/spatial-smoothing). In this paper, we show that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by ensembling spatially nearby feature maps of CNNs and flattening loss landscapes. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
+Then, why do Vision Transformers work that way? Our recent paper, ["Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness (ICML 2022)"](https://arxiv.org/abs/2105.12639) ([code](https://github.com/xxxnell/spatial-smoothing)), show that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by ensembling spatially nearby feature maps of CNNs and flattening loss landscapes. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
 
 
 
@@ -395,10 +395,6 @@ blocks = [
 </details>
 
 
-## Visualizing the Loss Landscapes
-
-Refer to [```losslandscape.ipynb```](losslandscape.ipynb) ([Colab notebook](https://colab.research.google.com/github/xxxnell/how-do-vits-work/blob/transformer/losslandscape.ipynb)) or [the original repo](https://github.com/tomgoldstein/loss-landscape) for exploring the loss landscapes. Run all cells to get predictive performance of the model for weight space grid. Loss landscape visualization shows that ViT has a flatter loss than ResNet.
-
 
 ## Fourier Analysis of Representations 
 
@@ -408,6 +404,11 @@ Refer to [```fourier_analysis.ipynb```](fourier_analysis.ipynb) ([Colab notebook
 ## Measuring Feature Map Variances
 
 Refer to [```featuremap_variance.ipynb```](featuremap_variance.ipynb) ([Colab notebook](https://colab.research.google.com/github/xxxnell/how-do-vits-work/blob/transformer/featuremap_variance.ipynb)) to measure feature map variance. Run all cells to visualize feature map variances. Feature map variance shows that MSAs aggregate feature maps, but Convs and MLPs diversify them.
+
+
+## Visualizing the Loss Landscapes
+
+Refer to [```losslandscape.ipynb```](losslandscape.ipynb) ([Colab notebook](https://colab.research.google.com/github/xxxnell/how-do-vits-work/blob/transformer/losslandscape.ipynb)) or [the original repo](https://github.com/tomgoldstein/loss-landscape) for exploring the loss landscapes. Run all cells to get predictive performance of the model for weight space grid. Loss landscape visualization shows that ViT has a flatter loss than ResNet.
 
 
 ## Evaluating Robustness on Corrupted Datasets
