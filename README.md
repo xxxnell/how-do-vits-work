@@ -2,7 +2,7 @@
 
 # How Do Vision Transformers Work?
 
-[[arxiv](https://arxiv.org/abs/2202.06709), [poster](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_poster_iclr2022.pdf), [slide](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_talk.pdf)]
+[[arxiv](https://arxiv.org/abs/2202.06709), [poster](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_poster_iclr2022.pdf), [slides](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_talk.pdf)]
 
 This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://arxiv.org/abs/2202.06709) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision ***does NOT lies in their weak inductive bias and the capturing of long-range dependencies***. MSAs are not merely generalized Convs, but rather generalized spatial smoothings that *complement* Convs.
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
@@ -57,7 +57,7 @@ Based on these design rules, we introduce AlterNet ([code](https://github.com/xx
 <img src="resources/vit/summary.png" style="width:70%;">
 </p>
 
-Then, why do Vision Transformers work that way? Our recent paper, ["Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness (ICML 2022)"](https://arxiv.org/abs/2105.12639) ([code](https://github.com/xxxnell/spatial-smoothing)), shows that a simple (non-trainable) 2 ✕ 2 box blur filter improves accuracy, uncertainty, and robustness simultaneously by *ensembling* spatially nearby feature maps of CNNs and flattening loss landscapes. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
+But why do Vision Transformers work that way? Our recent paper, ["Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness (ICML 2022)"](https://arxiv.org/abs/2105.12639) ([code and summary](https://github.com/xxxnell/spatial-smoothing)), shows that even a simple (non-trainable) 2 ✕ 2 box blur filter has the same properties. Spatial smoothings improve accuracy, uncertainty, and robustness simultaneously by *ensembling* spatially nearby feature maps of CNNs and flattening loss landscapes. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
 
 
 
