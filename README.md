@@ -4,7 +4,7 @@
 
 [[arxiv](https://arxiv.org/abs/2202.06709), [poster](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_poster_iclr2022.pdf), [slides](https://github.com/xxxnell/how-do-vits-work-storage/blob/master/resources/how_do_vits_work_talk.pdf)]
 
-This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://arxiv.org/abs/2202.06709) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision ***does NOT lies in their weak inductive bias and the capturing of long-range dependencies***. MSAs are not merely generalized Convs, but rather generalized spatial smoothings that *complement* Convs.
+This repository provides a PyTorch implementation of ["How Do Vision Transformers Work? (ICLR 2022 Spotlight)"](https://arxiv.org/abs/2202.06709) In the paper, we show that the success of multi-head self-attentions (MSAs) for computer vision ***does NOT lie in their weak inductive bias and the capturing of long-range dependencies***. MSAs are not merely generalized Convs, but rather generalized spatial smoothings that *complement* Convs.
 In particular, we address the following three key questions of MSAs and Vision Transformers (ViTs): 
 
 ***Q1. What properties of MSAs do we need to better optimize NNs?***  
