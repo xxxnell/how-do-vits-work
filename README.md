@@ -57,7 +57,7 @@ Based on these design rules, we introduce AlterNet ([code](https://github.com/xx
 <img src="resources/vit/summary.png" style="width:70%;">
 </p>
 
-But why do Vision Transformers work that way? Our recent paper, ["Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness (ICML 2022)"](https://arxiv.org/abs/2105.12639) ([code and summary](https://github.com/xxxnell/spatial-smoothing)), shows that even a simple (non-trainable) 2 ✕ 2 box blur filter has the same properties. Spatial smoothings improve accuracy, uncertainty, and robustness simultaneously by *ensembling* spatially nearby feature maps of CNNs and flattening loss landscapes. MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
+But why do Vision Transformers work that way? Our recent paper, ["Blurs Behaves Like Ensembles: Spatial Smoothings to Improve Accuracy, Uncertainty, and Robustness (ICML 2022)"](https://arxiv.org/abs/2105.12639) ([code and summary](https://github.com/xxxnell/spatial-smoothing) :octocat:, [poster](https://github.com/xxxnell/spatial-smoothing-storage/blob/master/resources/blurs_behave_like_ensembles_poster_icml2022.pdf)), shows that even a simple (non-trainable) 2 ✕ 2 box blur filter has the same properties. Spatial smoothings improve accuracy, uncertainty, and robustness simultaneously by *ensembling* spatially nearby feature maps of CNNs and flattening loss landscapes, and self-attentions can be deemed as trainable importance-weighted ensembles of feature maps. In conclusion, MSA is not simply generalized Conv, but rather a generalized (trainable) blur filter that complements Conv. Please check it out!
 
 
 
